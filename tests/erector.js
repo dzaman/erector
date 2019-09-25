@@ -176,7 +176,12 @@ describe('erector', () => {
 
     describe('operand types', () => {
       test('operands are interpreted as identifiers and literals, respectively', () => {
-        expect(erector.cmp('a', '=', 'b')).toStrictEqual(new Statement('?? = ?', ['a', 'b']));
+        expect(
+          erector.cmp('a', '=', 'b')
+        )
+        .toStrictEqual(
+          new Statement('?? = ?', ['a', 'b'])
+        );
       });
 
       test('left operand can be defined as literal', () => {
@@ -204,8 +209,109 @@ describe('erector', () => {
     //    - any
     //    - all
     //    - some
-    test(`operator is defaulted to 'in`, () => {
-      expect(erector.cmp_subquery('a', ['b'])).toStrictEqual(new Statement('?? IN (?)', ['a', 'b']));
+    test(`operator is defaulted to 'in'`, () => {
+      expect(
+        erector.cmp_subquery('a', ['b'])
+      )
+      .toStrictEqual(
+        new Statement('?? IN (?)', ['a', 'b'])
+      );
+    });
+  });
+
+  describe.each([
+    'set',
+    'setdefined',
+  ])('%p (shared functionality)', (method) => {
+    test.skip('first parameter must be an object', () => {
+      expect(erector[method]('not-an-object')).toStrictEqual(false);
+    });
+
+    test('an empty object returns an empty string', () => {
+      expect(erector[method]({})).toBe('');
+    });
+
+    test.each([
+      [{ a: 1 }, '??=?', ['a', 1]],
+      [{ a: 1, b: 'foo' }, '??=?, ??=?', ['a', 1, 'b', 'foo']],
+      [{ a: 1, b: 'foo', c: true }, '??=?, ??=?, ??=?', ['a', 1, 'b', 'foo', 'c', true]],
+      [{ a: 1, b: 'foo', c: true, d: null }, '??=?, ??=?, ??=?, ??=?', ['a', 1, 'b', 'foo', 'c', true, 'd', null]],
+    ])('all object keys are translated to assignments: %p', (obj, text, params) => {
+      const actual = erector[method](obj);
+      const expected = new Statement(text, params);
+      expect(actual).toStrictEqual(expected);
+    });
+
+    test('literal values are supported (these are the default)', () => {
+      const actual = erector[method]({ a: l`foo` });
+      const expected = new Statement('??=?', ['a', 'foo']);
+      expect(actual).toStrictEqual(expected);
+    });
+
+    test('identifier values are supported', () => {
+      const actual = erector[method]({ a: i`foo` });
+      const expected = new Statement('??=??', ['a', 'foo']);
+      expect(actual).toStrictEqual(expected);
+    });
+
+    test('raw values are supported', () => {
+      const actual = erector[method]({ a: raw`foo` });
+      const expected = new Statement('??=???', ['a', 'foo']);
+      expect(actual).toStrictEqual(expected);
+    });
+
+    test('will default to the option.default if there are no assignments', () => {
+      const actual = erector[method]({}, { default: true });
+      const expected = new Statement('true');
+      expect(actual).toStrictEqual(expected);
+    });
+
+    test.each([
+      'leading_comma',
+      'trailing_comma',
+    ])('will not append %p if there are no assignments and no default', (option_name) => {
+      const actual = erector[method]({}, { [option_name]: true });
+      expect(actual).toBe('');
+    });
+
+    test.each([
+      'leading_comma',
+      'trailing_comma',
+    ])('will append %p if there are assignments', (option_name) => {
+      const actual
+    });
+
+    test.each([
+      'leading_comma',
+      'trailing_comma',
+    ])('will append %p if there is a default', (option_name) => {
+    });
+  });
+
+  describe('set', () => {
+    test.each([
+      [{ a: undefined }, '??=?', ['a', undefined]],
+      [{ a: undefined, b: 'foo' }, '??=?, ??=?', ['a', undefined, 'b', 'foo']],
+    ])('undefined values can be set: %p', (obj, text, params) => {
+      expect(
+        erector.set(obj)
+      )
+      .toStrictEqual(
+        new Statement(text, params)
+      );
+    });
+  });
+
+  describe('setdefined', () => {
+    test.each([
+      [{ a: undefined }, ''],
+      [{ a: undefined, b: 'foo' }, new Statement('??=?', ['b', 'foo'])],
+      [{ a: undefined, b: 'foo', c: undefined }, new Statement('??=?', ['b', 'foo'])],
+    ])('undefined values are ignored: %p', (obj, expected) => {
+      expect(
+        erector.setdefined(obj)
+      )
+      .toStrictEqual(expected);
     });
   });
 

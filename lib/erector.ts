@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const knex = require('knex')({ client: 'pg' });
+const assert = require('assert');
 
 
 // TODO: configuration option -> generate strings or Statements
@@ -130,7 +131,7 @@ export class Statement extends QueryPart {
   protected text: string;
   protected params: StatementParam[];
 
-  constructor(text: string, params: StatementParam[]) {
+  constructor(text: string, params: StatementParam[] = []) {
     super();
 
     this.text = text;
@@ -329,38 +330,61 @@ erector.or = (...exps: any[]): Statement => {
   return new Statement(text, filtered_exps);
 };
 
-// // lol 😂
-// erector.set = (object, options = {}) => {
-//   if (_.isObject(object)) {
-//     throw Error('not an object');
-//   }
-// 
-//   const keys = _.sortBy(_.keys(object));
-//   const assignments = _.map(keys, (key) => `${key}=${object[key]}`);
-// 
-//   const assignment = assignments.join(', ') || options.default || '';
-// 
-//   if (assignment) {
-//     return [
-//       options.leading_comma ? ', ' : '',
-//       assignment,
-//       options.trailing_comma ? ',' : '',
-//     ].join('');
-//   } else {
-//     return assignment;
-//   }
-// };
-// 
-// erector.setdefined = (object, options = {}) => {
-//   const definedObject = _.reduce(object, (acc, value, key) => {
-//     if (value !== undefined) {
-//       acc[key] = value;
-//     }
-//     return acc;
-//   }, {});
-// 
-//   return this.set(definedObject, options);
-// };
+export interface SetOptions {
+  default?: string;
+  trailing_comma?: boolean;
+  leading_comma?: boolean;
+}
+
+// lol 😂
+erector.set = (obj: Object, options: SetOptions = {}): Statement | string => {
+  assert(_.isObject(obj), 'first parameter to set must be an object');
+
+  const keys = _.sortBy(_.keys(obj));
+
+  const text_parts = [];
+  const params = [];
+
+  _.each(keys, (key) => {
+    const value = obj[key];
+
+    params.push(key);
+
+    if (value instanceof EscapedQueryPart) {
+      text_parts.push(`??=${value.placeholder}`);
+      params.push(value.value);
+    } else {
+      text_parts.push('??=?');
+      params.push(value);
+    }
+  });
+
+  const assignment = text_parts.join(', ') || options.default;
+
+  if (assignment) {
+    const text = [
+      options.leading_comma ? ', ' : '',
+      assignment,
+      options.trailing_comma ? ',' : '',
+    ].join('');
+
+    return new Statement(text, params);
+  } else {
+    return '';
+  }
+};
+
+erector.setdefined = (obj: Object, options: SetOptions = {}): Statement | string => {
+  const defined_object = _.reduce(obj, (acc, value, key) => {
+    if (value !== undefined) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  // 'this' is defined as the module scope, not erector
+  return erector.set(defined_object, options);
+};
 
 //sql.values = (...args) => {
 //  const has_name = _.isString(args[0]);
