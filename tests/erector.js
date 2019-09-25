@@ -12,6 +12,8 @@ const {
   i,
   l,
   raw,
+
+  Statement,
 } = require('../lib/erector');
 
 describe('escape', () => {
@@ -128,9 +130,26 @@ describe('erector', () => {
 
     describe(operator, () => {
       test.each([
-        [['', 'a', 'b', 'c'], `a ${operator_upper} b ${operator_upper} c`],
-        [[0, 1, 2, 3], `1 ${operator_upper} 2 ${operator_upper} 3`],
-        [[true, false, undefined, null], 'true'],
+        [
+          ['', 'a', 'b', 'c'],
+          new Statement(`??? ${operator_upper} ??? ${operator_upper} ???`, ['a', 'b', 'c'])
+        ],
+        [
+          [0, 1, 2, 3],
+          new Statement(`??? ${operator_upper} ??? ${operator_upper} ???`, [1, 2, 3])
+        ],
+        [
+          [true, false, undefined, null],
+          new Statement('???', [true])
+        ],
+        [
+          [new Literal('a'), new Identifier('b'), new Raw('c')],
+          new Statement(`??? ${operator_upper} ??? ${operator_upper} ???`, [
+            new Literal('a'),
+            new Identifier('b'),
+            new Raw('c'),
+          ])
+        ],
       ])(`${operator}(%p) -> %p`, (parts, result) => {
         expect(erector[operator](...parts)).toStrictEqual(result);
       });
@@ -143,11 +162,11 @@ describe('erector', () => {
   //    - null/not null
   describe('cmp', () => {
     test(`operator is defaulted to '='`, () => {
-      expect(erector.cmp('a', 'b')).toBe(`"a" = 'b'`);
+      expect(erector.cmp('a', 'b')).toStrictEqual(new Statement('?? = ?', ['a', 'b']));
     });
 
     test('operator can be overridden', () => {
-      expect(erector.cmp('a', '!=', 'b')).toBe(`"a" != 'b'`);
+      expect(erector.cmp('a', '!=', 'b')).toStrictEqual(new Statement('?? != ?', ['a', 'b']));
     });
 
     test('undefined right operand results in empty string', () => {
@@ -157,23 +176,23 @@ describe('erector', () => {
 
     describe('operand types', () => {
       test('operands are interpreted as identifiers and literals, respectively', () => {
-        expect(erector.cmp('a', '=', 'b')).toBe(`"a" = 'b'`);
+        expect(erector.cmp('a', '=', 'b')).toStrictEqual(new Statement('?? = ?', ['a', 'b']));
       });
 
       test('left operand can be defined as literal', () => {
-        expect(erector.cmp(l`a`, '=', 'b')).toBe(`'a' = 'b'`);
+        expect(erector.cmp(l`a`, '=', 'b')).toStrictEqual(new Statement('? = ?', ['a', 'b']));
       });
       
       test('left operand can be defined as raw', () => {
-        expect(erector.cmp(raw`a`, '=', 'b')).toBe(`a = 'b'`);
+        expect(erector.cmp(raw`a`, '=', 'b')).toStrictEqual(new Statement('??? = ?', ['a', 'b']));
       });
 
       test('right operand can be defined as an identifier', () => {
-        expect(erector.cmp('a', '=', i`b`)).toBe(`"a" = "b"`);
+        expect(erector.cmp('a', '=', i`b`)).toStrictEqual(new Statement('?? = ??', ['a', 'b']));
       });
 
       test('right operand can be defined as raw', () => {
-        expect(erector.cmp('a', '=', raw`b`)).toBe(`"a" = b`);
+        expect(erector.cmp('a', '=', raw`b`)).toStrictEqual(new Statement('?? = ???', ['a', 'b']));
       });
     });
   });
@@ -186,7 +205,7 @@ describe('erector', () => {
     //    - all
     //    - some
     test(`operator is defaulted to 'in`, () => {
-      expect(erector.cmp_subquery('a', ['b'])).toBe(`"a" IN ('b')`);
+      expect(erector.cmp_subquery('a', ['b'])).toStrictEqual(new Statement('?? IN (?)', ['a', 'b']));
     });
   });
 

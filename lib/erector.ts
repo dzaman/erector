@@ -17,12 +17,12 @@ interface QueryPartConstructor {
 
 export abstract class QueryPart {
 
-  static escape = escape;
+  static readonly escape = escape;
 
   public abstract format(): string;
 
   // public abstract text(): string;
-  // public abstract placeholders(): any[];
+  // public abstract values(): any[];
 
   public toString(): string {
     return this.format();
@@ -30,9 +30,10 @@ export abstract class QueryPart {
 
 }
 
-export abstract class SimpleQueryPart extends QueryPart {
+export abstract class EscapedQueryPart extends QueryPart {
 
-  protected value: any;
+  public readonly value: any;
+  public readonly abstract placeholder: string;
 
   constructor(value: any) {
     super();
@@ -58,7 +59,9 @@ export abstract class SimpleQueryPart extends QueryPart {
 
 }
 
-export class Raw extends SimpleQueryPart {
+export class Raw extends EscapedQueryPart {
+
+  public placeholder = '???';
   
   public format(): string {
     return this.value.toString();
@@ -66,7 +69,9 @@ export class Raw extends SimpleQueryPart {
 
 }
 
-export class Literal extends SimpleQueryPart {
+export class Literal extends EscapedQueryPart {
+
+  public placeholder = '?';
 
   public format(): string {
     return (<typeof Literal>this.constructor).escape('?', this.value).toString();
@@ -74,7 +79,9 @@ export class Literal extends SimpleQueryPart {
 
 }
  
-export class Identifier extends SimpleQueryPart {
+export class Identifier extends EscapedQueryPart {
+
+  public placeholder = '??';
 
   public format(): string {
     return (<typeof Identifier>this.constructor).escape('??', this.value).toString();
@@ -115,15 +122,15 @@ export class Identifier extends SimpleQueryPart {
 //  }
 //}
 
+// QUESTION: Does this really need to be so restrictive?
 export type StatementParam = string | number | boolean | QueryPart;
-export type StatementParams = Array<StatementParam>;
 
-class Statement extends QueryPart {
+export class Statement extends QueryPart {
 
   protected text: string;
-  protected params: StatementParams;
+  protected params: StatementParam[];
 
-  constructor(text: string, params: StatementParams) {
+  constructor(text: string, params: StatementParam[]) {
     super();
 
     this.text = text;
@@ -216,51 +223,65 @@ export const erector = (strings, ...exps) => {
   //  );
 }
 
-export const raw: Function = erector.raw = SimpleQueryPart.make_template_factory(Raw);
-export const i: Function = erector.identifier = SimpleQueryPart.make_template_factory(Identifier);
-export const l: Function = erector.literal = SimpleQueryPart.make_template_factory(Literal);
+export const raw: Function = erector.raw = EscapedQueryPart.make_template_factory(Raw);
+export const i: Function = erector.identifier = EscapedQueryPart.make_template_factory(Identifier);
+export const l: Function = erector.literal = EscapedQueryPart.make_template_factory(Literal);
 
 // TODO: should this return a Statement?
 erector.if = (test: any, pass: any, fail: any): any => {
   let is_pass = typeof test === 'function' ? test() : test;
+  // return pass or fail directly if QueryPart, otherwise Raw?
   return is_pass ? pass : fail;
 };
 
 // TODO: types
-// TODO: should this return a Statement?
 erector.cmp_subquery = (a, ...args) => {
   const default_operator = args.length === 1;
   const operator = default_operator ? 'IN' : args[0];
-  const b = default_operator ? args[0] : args[1];
+  const b_input = default_operator ? args[0] : args[1];
+  const b_array = _.isArray(b_input) ? b_input : [b_input];
 
-  if (_.isUndefined(b) || _.isArray(b) && _.isEmpty(b)) {
+  // TODO: are these checks sufficient?
+  // TODO: b_array is now guaranteed to be an array
+  if (_.isUndefined(b_array) || _.isArray(b_array) && _.isEmpty(b_array)) {
     return '';
   } else {
-    const parts = [];
+    const text_parts = [];
+    const params = [];
 
-    if (a instanceof QueryPart) {
-      parts.push(a.format());
+    if (a instanceof EscapedQueryPart) {
+      text_parts.push(a.placeholder);
+      params.push(a.value);
     } else {
-      parts.push(escape('??', [a]));
+      text_parts.push('??');
+      params.push(a);
     }
 
-    parts.push(operator);
+    text_parts.push(operator);
 
-    let subquery;
-    if (b instanceof QueryPart) {
-      subquery = b.format();
-    } else {
-      subquery = _.map(b, (b_part) => new Literal(b_part).toString()).join(', ');
-    }
-    parts.push(`(${subquery})`);
+    const b_parts = [];
 
-    return parts.join(' ');
+    _.each(b_array, (b_element) => {
+      if (b_element instanceof EscapedQueryPart) {
+        b_parts.push(b_element.placeholder);
+        params.push(b_element.value);
+      } else {
+        b_parts.push('?');
+        params.push(b_element);
+      }
+    });
+
+    text_parts.push(`(${b_parts.join(', ')})`);
+    return new Statement(text_parts.join(' '), params);
   }
 };
 
+// should this "unpack" escaped query parts?
+// this "unpacks" escaped query parts because it's nice for the query to not have a bunch of ??? -> literal ??? -> identifier...
+
+// if a string, it's empty ''
 // TODO: types
-// TODO: should this return a Statement?
-erector.cmp = (a, ...args) => {
+erector.cmp = (a, ...args): Statement | string => {
   const default_operator = args.length === 1;
   const operator = default_operator ? '=' : args[0];
   const b = default_operator ? args[0] : args[1];
@@ -269,34 +290,43 @@ erector.cmp = (a, ...args) => {
     // return an empty string because it's better for this to be excludeable in a template string
     return '';
   } else {
-    const parts = [];
+    const text_parts = [];
+    const params = [];
 
-    if (a instanceof QueryPart) {
-      parts.push(a.format());
+    if (a instanceof EscapedQueryPart) {
+      text_parts.push(a.placeholder);
+      params.push(a.value);
     } else {
-      parts.push(escape('??', [a]));
+      text_parts.push('??');
+      params.push(a);
     }
 
-    parts.push(operator);
+    text_parts.push(operator);
 
-    if (b instanceof QueryPart) {
-      parts.push(b.format());
+    if (b instanceof EscapedQueryPart) {
+      text_parts.push(b.placeholder);
+      params.push(b.value);
     } else {
-      parts.push(escape('?', [b]));
+      text_parts.push('?');
+      params.push(b);
     }
 
-    return parts.join(' ');
+    return new Statement(text_parts.join(' '), params);
   }
 };
  
-// TODO: should this return a Statement?
-erector.and = (...exps: any[]): string => {
-  return exps.filter((exp) => exp).join(' AND ');
+// NOTE: This does not "unpack" escaped expressions (literals, etc.) because we expect exps to all be raw.
+// If literals are passed in, it will pass those, escaped, through ???, so they will work as-expected.
+erector.and = (...exps: any[]): Statement => {
+  const filtered_exps = exps.filter((exp) => exp);
+  const text = filtered_exps.map(() => '???').join(' AND ');
+  return new Statement(text, filtered_exps);
 };
 
-// TODO: should this return a Statement?
-erector.or = (...exps: any[]): string => {
-  return exps.filter((exp) => exp).join(' OR ');
+erector.or = (...exps: any[]): Statement => {
+  const filtered_exps = exps.filter((exp) => exp);
+  const text = filtered_exps.map(() => '???').join(' OR ');
+  return new Statement(text, filtered_exps);
 };
 
 // // lol 😂
