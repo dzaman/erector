@@ -5,6 +5,7 @@ const assert = require('assert');
 
 // TODO: configuration option -> generate strings or Statements
 // TODO: configuration option -> left operand default type is identifier
+// QUESTION: Object or object?
 
 /**
  * @param statement A SQL string with literal (?, :name) and identifier (??, :name:) placeholders
@@ -331,7 +332,6 @@ erector.or = (...exps: any[]): Statement => {
 };
 
 export interface SetOptions {
-  default?: string;
   trailing_comma?: boolean;
   leading_comma?: boolean;
 }
@@ -359,12 +359,10 @@ erector.set = (obj: Object, options: SetOptions = {}): Statement | string => {
     }
   });
 
-  const assignment = text_parts.join(', ') || options.default;
-
-  if (assignment) {
+  if (text_parts.length) {
     const text = [
       options.leading_comma ? ', ' : '',
-      assignment,
+      text_parts.join(', '),
       options.trailing_comma ? ',' : '',
     ].join('');
 

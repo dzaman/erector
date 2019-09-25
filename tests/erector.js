@@ -260,31 +260,23 @@ describe('erector', () => {
       expect(actual).toStrictEqual(expected);
     });
 
-    test('will default to the option.default if there are no assignments', () => {
-      const actual = erector[method]({}, { default: true });
-      const expected = new Statement('true');
-      expect(actual).toStrictEqual(expected);
-    });
-
     test.each([
-      'leading_comma',
-      'trailing_comma',
-    ])('will not append %p if there are no assignments and no default', (option_name) => {
-      const actual = erector[method]({}, { [option_name]: true });
+      { leading_comma: true },
+      { trailing_comma: true },
+      { leading_comma: true, trailing_comma: true },
+    ])('will not append %p if there are no assignments', (options) => {
+      const actual = erector[method]({}, options);
       expect(actual).toBe('');
     });
 
     test.each([
-      'leading_comma',
-      'trailing_comma',
-    ])('will append %p if there are assignments', (option_name) => {
-      const actual
-    });
-
-    test.each([
-      'leading_comma',
-      'trailing_comma',
-    ])('will append %p if there is a default', (option_name) => {
+      [{ leading_comma: true }, ', ??=?'],
+      [{ trailing_comma: true }, '??=?,'],
+      [{ leading_comma: true, trailing_comma: true }, ', ??=?,'],
+    ])('will append %p if there are assignments', (options, text) => {
+      const actual = erector[method]({ a: 1 }, options);
+      const expected = new Statement(text, ['a', 1]);
+      expect(actual).toStrictEqual(expected);
     });
   });
 
