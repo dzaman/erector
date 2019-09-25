@@ -44,7 +44,7 @@ export abstract class EscapedQueryPart extends QueryPart {
   }
 
   public static make_template_factory(target_class: QueryPartConstructor) {
-    return (strings: string[], ...exps) => {
+    return (strings: string[], ...exps: any[]) => {
       const values: string[] = [];
    
       for (let i = 0; i < strings.length; i++) {
@@ -91,41 +91,41 @@ export class Identifier extends EscapedQueryPart {
 
 }
 
-// class AbstractList {
-//   constructor() {
-//     throw Error('AbstractList cannot be instantiated');
-//   }
-// 
-//   format(content, array, object) {
-//     // TODO
-//   }
-// }
+export abstract class List {
+  public name?: string;
+  public content?: any[] | object;
+  // array: Array;
+  // object: Object;
 
-//class ListLabels {
-//  constructor(name, content, array, object) {
-//    this.name = name;
-//    this.content = content;
-//    this.array = array;
-//    this.object = object;
-//  }
-//}
-//
-//class ListValues {
-//  name: string;
-//  content: Array | Object;
-//  array: Array;
-//  object: Object;
-//
-//  constructor(name, content, array, object) {
-//    this.name = name;
-//    this.content = content;
-//    this.array = array;
-//    this.object = object;
-//  }
-//}
+  constructor();
+  constructor(content: any[] | object);
+  constructor(name: string);
+  constructor(name: string, content: any[] | object);
+  constructor(...args: any[]) {
+    // super();
+
+    if (_.isString(args[0])) {
+      this.name = name;
+    }
+
+    for (let i = 0; i < args.length; i++) {
+      if (_.isArray(args[i]) || _.isObject(args[i])) {
+        this.content = args[i];
+      }
+    }
+
+    // this.array = array;
+    // this.object = object;
+  }
+}
+
+class ListLabels extends List {}
+
+class ListValues extends List {}
 
 // QUESTION: Does this really need to be so restrictive?
-export type StatementParam = string | number | boolean | QueryPart;
+export type StatementParamFunction = (...args: any[]) => StatementParam;
+export type StatementParam = string | number | boolean | QueryPart | StatementParamFunction;
 
 export class Statement extends QueryPart {
 
@@ -148,7 +148,7 @@ export class Statement extends QueryPart {
 /**
  * @param strings   Comment for `strings`
  */
-export const erector = (strings, ...exps) => {
+export const erector = (strings: string[], ...exps: any[]) => {
   //  // const string = strings.join('?');
   //  let strings_and_placeholders = [];
   //
@@ -236,8 +236,10 @@ erector.if = (test: any, pass: any, fail: any): any => {
   return is_pass ? pass : fail;
 };
 
-// TODO: types
-erector.cmp_subquery = (a, ...args) => {
+const cmp_subquery: {
+  (a: StatementParam, operator: string, b: StatementParam): Statement | string;
+  (a: StatementParam, b: StatementParam): Statement | string;
+} = (a: StatementParam, ...args: any[]) => {
   const default_operator = args.length === 1;
   const operator = default_operator ? 'IN' : args[0];
   const b_input = default_operator ? args[0] : args[1];
@@ -248,8 +250,8 @@ erector.cmp_subquery = (a, ...args) => {
   if (_.isUndefined(b_array) || _.isArray(b_array) && _.isEmpty(b_array)) {
     return '';
   } else {
-    const text_parts = [];
-    const params = [];
+    const text_parts: string[] = [];
+    const params: any[] = [];
 
     if (a instanceof EscapedQueryPart) {
       text_parts.push(a.placeholder);
@@ -261,9 +263,9 @@ erector.cmp_subquery = (a, ...args) => {
 
     text_parts.push(operator);
 
-    const b_parts = [];
+    const b_parts: string[] = [];
 
-    _.each(b_array, (b_element) => {
+    _.each(b_array, (b_element: any) => {
       if (b_element instanceof EscapedQueryPart) {
         b_parts.push(b_element.placeholder);
         params.push(b_element.value);
@@ -278,12 +280,16 @@ erector.cmp_subquery = (a, ...args) => {
   }
 };
 
+erector.cmp_subquery = cmp_subquery;
+
 // should this "unpack" escaped query parts?
 // this "unpacks" escaped query parts because it's nice for the query to not have a bunch of ??? -> literal ??? -> identifier...
 
 // if a string, it's empty ''
-// TODO: types
-erector.cmp = (a, ...args): Statement | string => {
+const cmp: {
+  (a: StatementParam, operator: string, b: StatementParam): Statement | string;
+  (a: StatementParam, b: StatementParam): Statement | string;
+} = (a: StatementParam, ...args: any[]): Statement | string => {
   const default_operator = args.length === 1;
   const operator = default_operator ? '=' : args[0];
   const b = default_operator ? args[0] : args[1];
@@ -292,8 +298,8 @@ erector.cmp = (a, ...args): Statement | string => {
     // return an empty string because it's better for this to be excludeable in a template string
     return '';
   } else {
-    const text_parts = [];
-    const params = [];
+    const text_parts: string[] = [];
+    const params: any[] = [];
 
     if (a instanceof EscapedQueryPart) {
       text_parts.push(a.placeholder);
@@ -316,6 +322,8 @@ erector.cmp = (a, ...args): Statement | string => {
     return new Statement(text_parts.join(' '), params);
   }
 };
+
+erector.cmp = cmp;
  
 // NOTE: This does not "unpack" escaped expressions (literals, etc.) because we expect exps to all be raw.
 // If literals are passed in, it will pass those, escaped, through ???, so they will work as-expected.
@@ -337,16 +345,16 @@ export interface SetOptions {
 }
 
 // lol 😂
-erector.set = (obj: Object, options: SetOptions = {}): Statement | string => {
+erector.set = (obj: { [key: string]: any }, options: SetOptions = {}): Statement | string => {
   assert(_.isObject(obj), 'first parameter to set must be an object');
 
   const keys = _.sortBy(_.keys(obj));
 
-  const text_parts = [];
-  const params = [];
+  const text_parts: string[] = [];
+  const params: any[] = [];
 
-  _.each(keys, (key) => {
-    const value = obj[key];
+  _.each(keys, (key: any) => {
+    const value = (<any>obj[key]);
 
     params.push(key);
 
@@ -372,8 +380,8 @@ erector.set = (obj: Object, options: SetOptions = {}): Statement | string => {
   }
 };
 
-erector.setdefined = (obj: Object, options: SetOptions = {}): Statement | string => {
-  const defined_object = _.reduce(obj, (acc, value, key) => {
+erector.setdefined = (obj: object, options: SetOptions = {}): Statement | string => {
+  const defined_object = _.reduce(obj, (acc: { [key: string]: any[] }, value: any, key: string) => {
     if (value !== undefined) {
       acc[key] = value;
     }
@@ -384,21 +392,25 @@ erector.setdefined = (obj: Object, options: SetOptions = {}): Statement | string
   return erector.set(defined_object, options);
 };
 
-//sql.values = (...args) => {
-//  const has_name = _.isString(args[0]);
-//  const list = has_name ? args[1] : args[0];
-//  const name = has_name ? args[0] : null;
-//  return new ListValues(name, list);
-//};
-//
-//sql.labels = (...args) => {
-//  const has_name = _.isString(args[0]);
-//  const list = has_name ? args[1] : args[0];
-//  const name = has_name ? args[0] : null;
-//  const is_array = _.isArray(list);
-//  const array = is_array ? list : null;
-//  const object = is_array ? null : list;
-//  return new ListLabels(name, list, array, object);
-//};
-//
+const values: {
+  (): ListValues;
+  (name: string): ListValues;
+  (content: any[] | object): ListValues;
+  (name: string, content: any[] | object): ListValues;
+} = (...args: any[]) => {
+  return new ListValues(args[0], args[1]);
+}
+
+erector.values = values;
+
+const labels: {
+  (): ListLabels;
+  (name: string): ListLabels;
+  (content: any[] | object): ListLabels;
+  (name: string, content: any[] | object): ListLabels;
+} = (...args: any[]) => {
+  return new ListLabels(args[0], args[1]);
+}
+
+erector.labels = labels;
 

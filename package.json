@@ -5,7 +5,8 @@
   "main": "lib/erector.js",
   "scripts": {
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
-    "test": "node_modules/.bin/jest"
+    "test": "node_modules/.bin/jest",
+    "test+tsc": "node_modules/.bin/tsc --noEmit -p . && npm test"
   },
   "author": "Matthew Dzaman <matthew@dzaman.org>",
   "license": "MIT",
