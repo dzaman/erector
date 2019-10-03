@@ -2,7 +2,6 @@ const _ = require('lodash');
 const knex = require('knex')({ client: 'pg' });
 const assert = require('assert');
 
-
 // TODO: configuration option -> generate strings or Statements
 // TODO: configuration option -> left operand default type is identifier
 // TODO: configuration option -> .array to treat a array vs. .list to expand
@@ -14,18 +13,18 @@ const assert = require('assert');
  */
 export const escape = (statement: string, arg: any): string => knex.raw(statement, arg).toString();
 
-interface QueryPartConstructor {
-  new(value: any): QueryPart;
+interface SingleValueQueryPartConstructor {
+  new(value: any): SingleValueQueryPart;
 }
 
 export abstract class QueryPart {
 
   static readonly escape = escape;
 
-  public abstract format(): string;
+  public abstract placeholder: string;
 
-  public abstract text(): string;
-  public abstract params(): any;
+  public abstract param(): string;
+  public abstract format(): string;
 
   public toString(): string {
     return this.format();
@@ -33,10 +32,19 @@ export abstract class QueryPart {
 
 }
 
-export abstract class EscapedQueryPart extends QueryPart {
+export abstract class MultiValueQueryPart extends QueryPart {
 
-  public readonly value: any;
-  public readonly placeholder: string;
+  public placeholder = '???';
+
+  public param(): string {
+    return this.format();
+  }
+
+}
+
+export abstract class SingleValueQueryPart extends QueryPart {
+
+  public value: any;
 
   constructor(value: any) {
     super();
@@ -44,15 +52,11 @@ export abstract class EscapedQueryPart extends QueryPart {
     this.value = value;
   }
 
-  public text(): string {
-    return this.placeholder;
+  public param(): string {
+    return `${this.value}`;
   }
 
-  public params(): any {
-    return this.value;
-  }
-
-  public static make_template_factory(target_class: QueryPartConstructor) {
+  public static make_template_factory(target_class: SingleValueQueryPartConstructor) {
     return (strings: string[], ...exps: any[]) => {
       const values: string[] = [];
    
@@ -67,51 +71,69 @@ export abstract class EscapedQueryPart extends QueryPart {
       return new target_class(values.join(''));
     };
   }
-
 }
 
-export class Raw extends EscapedQueryPart {
+export class Raw extends SingleValueQueryPart {
 
   public placeholder = '???';
-  
+
   public format(): string {
-    return this.value.toString();
+    return this.value;
+  }
+}
+
+export abstract class KnexFormattedSingleValueQueryPart extends SingleValueQueryPart {
+
+  public format(): string {
+    return (<typeof KnexFormattedSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value).toString();
   }
 
 }
 
-export class Literal extends EscapedQueryPart {
+// https://www.bryntum.com/blog/the-mixin-pattern-in-typescript-all-you-need-to-know/
+//
+//export type AnyFunction<A = any> = (...input: any[]) => A;
+//export type AnyConstructor<A = object> = new (...input: any[]) => A;
+//export type Mixin<T extends AnyFunction> = InstanceType<ReturnType<T>>;
+//
+//export const KnexFormatted = <T extends AnyConstructor<object>>(base : T) => 
+//  class KnexFormatted extends base {
+//
+//    abstract placeholder;
+//    abstract value;
+//
+//    public format(): string {
+//      return (<typeof KnexFormatted>this.constructor).escape(this.placeholder, this.value).toString();
+//    }
+//
+//  };
+// 
+// export type KnexFormatted = Mixin<typeof KnexFormatted>;
+
+export class Literal extends KnexFormattedSingleValueQueryPart {
 
   public placeholder = '?';
 
-  public format(): string {
-    return (<typeof Literal>this.constructor).escape('?', this.value).toString();
-  }
-
 }
  
-export class Identifier extends EscapedQueryPart {
+export class Identifier extends KnexFormattedSingleValueQueryPart {
 
   public placeholder = '??';
 
-  public format(): string {
-    return (<typeof Identifier>this.constructor).escape('??', this.value).toString();
-  }
-
 }
 
-export abstract class List {
+export abstract class List extends MultiValueQueryPart {
+
   public name?: string;
   public content?: any[] | object;
-  // array: Array;
-  // object: Object;
+  public source?: List;
 
   constructor();
   constructor(content: any[] | object);
   constructor(name: string);
   constructor(name: string, content: any[] | object);
   constructor(...args: any[]) {
-    // super();
+    super();
 
     if (_.isString(args[0])) {
       this.name = name;
@@ -122,10 +144,12 @@ export abstract class List {
         this.content = args[i];
       }
     }
-
-    // this.array = array;
-    // this.object = object;
   }
+
+  public format(): string {
+    return '';
+  }
+
 }
 
 class ListLabels extends List {}
@@ -136,155 +160,150 @@ class ListValues extends List {}
 export type StatementParamFunction = (...args: any[]) => StatementParam;
 export type StatementParam = string | number | boolean | QueryPart | StatementParamFunction;
 
-export class Statement extends QueryPart {
+// currently Statements === MultiValueQueryParts, but that may change
+export class Statement extends MultiValueQueryPart {
 
-  protected text: string;
-  protected params: StatementParam[];
+  public readonly text: string;
+  public readonly params: any[];
 
-  constructor(text: string, params: StatementParam[] = []) {
+  constructor(text: string, params: any[]) {
     super();
 
     this.text = text;
     this.params = params;
   }
 
-  public text(): string {
-    return this.text;
-  }
-
-  public params(): string {
-    return this.params;
-  }
-
   public format(): string {
+    // this actually needs to handle ???
     return (<typeof Statement>this.constructor).escape(this.text, this.params).toString();
   }
 
 }
 
-// NOTE: exp is mutated
-const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
-  while (typeof exp === 'function') {
-    exp = exp();
-  }
 
-  return exp;
-}
+// // NOTE: exp is mutated
+// const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
+//   while (typeof exp === 'function') {
+//     exp = exp();
+//   }
+// 
+//   return exp;
+// }
 
 /**
  * @param strings   Comment for `strings`
  */
 export const erector = (strings: string[], ...exps: any[]) => {
-
-  // statement -> treat as raw w/ statement as value
-  // function -> eval... recursively?
-  // listlabels/values -> treat as statement
-  // arrays -> treat as statement
-
-  let text_parts: string[] = [];
-  let params: any[] = [];
-
-  const lists = {};
-  for (let i = 0; i < exps.length; i += 1) {
-    const exp = _resolve_function_recursively(exps[i]);
-
-    if (exp instanceof ListLabels || exps instanceof ListValues) {
-      // TODO: list tracking -- but do it on the objects themselves
-      // const key = exp.name || undefined;
-      //  
-      // if (exp.content) {
-      //   if (lists[key]) {
-      //     // deep inequality is an error
-      //   } else {
-      //     lists[key] = exp;
-      //   }
-      // } else if (!(key in lists)) {
-      //   lists[key] = undefined;
-      // }
-
-      // TODO: how to construct statement
-      // exp = new Statement(...);
-    }
-
-    if (exp instanceof statement) {
-      exp = new Raw(exp);
-    }
-  }
-
-  // make sure lists are defined
-  _.each(lists, (value, key) => {
-    if (value === undefined) {
-      // throw error for key
-    }
-  });
-
-  for (let i = 0; i < strings.length - 1; i += 1) {
-    const exp = exps[i];
-    const count = _.isArray(exp) ? _.size(exp) : 1;
-
-    const is_double_quoted  = strings[i][strings[i].length - 1] === '"' && strings[i + 1][0] === '"';
-    const is_identifier = is_double_quoted || exp instanceof Identifier;
-
-    if (exp instanceof e
-    
-    // pushing on as ?/??/??? with the value added to the list would...
-    // could also push the whole instance (e.g. Raw) and insert ???
-    // returning a single string ... no need for statements
-    if (exp instanceof EscapedQueryPart) {
-      // exp and strings may have nothing to do with one another, e.g.: 
-      //    SELECT * FROM "${foo}" will be broken down into 'SELECT FROM * "'
-      //    and foo
-      text_parts.push(strings[i]);
-      // this is always ???
-      text_parts.push(exp.placeholder);
-      params.push(exp.value);
-    } else if (exp instanceof Statement) {
-      text_parts.push('???');
-      params.push(exp);
-    //} else if (exp instanceof ListLabels || exp instanceof ListValues) {
-    //  const key = exp.name;
-    //  const { 
-    //    content,
-    //    array,
-    //    object,
-    //  } = lists[key].content; 
-    // 
-    //  if (exp instanceof ListLabels) {
-    //    const labels = exp.array ? exp.array : _.values(exp.object);
-    //    // array of identifiers that should be escaped unless they are raw
-    //  } else if (exp instanceof ListValues) {
-    //    const values = exp.array ? exp.array : _.keys(exp.object);
-    //    // array of literals that should be escaped unless they are raw
-    //  }
-    } else {
-      // default treatment is ?? within "" and ? otherwise
-      if (strings[i][strings[i].length - 1] === '"' &&
-          strings[i + 1][0] === '"') {
-        // push the beginning part of the string up to '"'
-        text_parts.push(strings[i].substring(0, strings[i].length - 1));
-        // push all of the placeholders onto the string
-        text_parts.push(_.range(count).map(() => '??').join(', '));
-        // trim the preceeding '"' from the next string
-        strings[i + 1] = strings[i + 1].substring(1);
-      } else {
-        // push the string as-is
-        text_parts.push(strings[i]);
-        // push all of the placeholders onto the string
-        text_parts.push(_.range(count).map(() => '?').join(', '));
-      }
-    }
-  
-  }
-  //  
-  //  return new Statement(
-  //    text_parts.join(''),
-  //    _.flatten(_.filter(exps, (exp) => !(exp instanceof Raw))),
-  //  );
+//
+//  // statement -> treat as raw w/ statement as value
+//  // function -> eval... recursively?
+//  // listlabels/values -> treat as statement
+//  // arrays -> treat as statement
+//
+//  let text_parts: string[] = [];
+//  let params: any[] = [];
+//
+//  const lists = {};
+//  for (let i = 0; i < exps.length; i += 1) {
+//    const exp = _resolve_function_recursively(exps[i]);
+//
+//    // if (exp instanceof ListLabels || exps instanceof ListValues) {
+//    //   // TODO: list tracking -- but do it on the objects themselves
+//    //   // const key = exp.name || undefined;
+//    //   //  
+//    //   // if (exp.content) {
+//    //   //   if (lists[key]) {
+//    //   //     // deep inequality is an error
+//    //   //   } else {
+//    //   //     lists[key] = exp;
+//    //   //   }
+//    //   // } else if (!(key in lists)) {
+//    //   //   lists[key] = undefined;
+//    //   // }
+//    //
+//    //   // TODO: how to construct statement
+//    //   // exp = new Statement(...);
+//    // }
+//
+//    if (exp instanceof Statement) {
+//      exp = new Raw(exp);
+//    }
+//  }
+//
+//  // make sure lists are defined
+//  _.each(lists, (value, key) => {
+//    if (value === undefined) {
+//      // throw error for key
+//    }
+//  });
+//
+//  for (let i = 0; i < strings.length - 1; i += 1) {
+//    const exp = exps[i];
+//    const count = _.isArray(exp) ? _.size(exp) : 1;
+//
+//    const is_double_quoted  = strings[i][strings[i].length - 1] === '"' && strings[i + 1][0] === '"';
+//    const is_identifier = is_double_quoted || exp instanceof Identifier;
+//
+//    if (exp instanceof e
+//    
+//    // pushing on as ?/??/??? with the value added to the list would...
+//    // could also push the whole instance (e.g. Raw) and insert ???
+//    // returning a single string ... no need for statements
+//    if (exp instanceof QueryPart) {
+//      // exp and strings may have nothing to do with one another, e.g.: 
+//      //    SELECT * FROM "${foo}" will be broken down into 'SELECT FROM * "'
+//      //    and foo
+//      text_parts.push(strings[i]);
+//      // this is always ???
+//      text_parts.push(exp.placeholder);
+//      params.push(exp.value);
+//    } else if (exp instanceof Statement) {
+//      text_parts.push('???');
+//      params.push(exp);
+//    //} else if (exp instanceof ListLabels || exp instanceof ListValues) {
+//    //  const key = exp.name;
+//    //  const { 
+//    //    content,
+//    //    array,
+//    //    object,
+//    //  } = lists[key].content; 
+//    // 
+//    //  if (exp instanceof ListLabels) {
+//    //    const labels = exp.array ? exp.array : _.values(exp.object);
+//    //    // array of identifiers that should be escaped unless they are raw
+//    //  } else if (exp instanceof ListValues) {
+//    //    const values = exp.array ? exp.array : _.keys(exp.object);
+//    //    // array of literals that should be escaped unless they are raw
+//    //  }
+//    } else {
+//      // default treatment is ?? within "" and ? otherwise
+//      if (strings[i][strings[i].length - 1] === '"' &&
+//          strings[i + 1][0] === '"') {
+//        // push the beginning part of the string up to '"'
+//        text_parts.push(strings[i].substring(0, strings[i].length - 1));
+//        // push all of the placeholders onto the string
+//        text_parts.push(_.range(count).map(() => '??').join(', '));
+//        // trim the preceeding '"' from the next string
+//        strings[i + 1] = strings[i + 1].substring(1);
+//      } else {
+//        // push the string as-is
+//        text_parts.push(strings[i]);
+//        // push all of the placeholders onto the string
+//        text_parts.push(_.range(count).map(() => '?').join(', '));
+//      }
+//    }
+//  
+//  }
+//  //  
+//  //  return new Statement(
+//  //    text_parts.join(''),
+//  //    _.flatten(_.filter(exps, (exp) => !(exp instanceof Raw))),
+//  //  );
 }
 
-export const raw: Function = erector.raw = EscapedQueryPart.make_template_factory(Raw);
-export const i: Function = erector.identifier = EscapedQueryPart.make_template_factory(Identifier);
-export const l: Function = erector.literal = EscapedQueryPart.make_template_factory(Literal);
+export const raw: Function = erector.raw = SingleValueQueryPart.make_template_factory(Raw);
+export const i: Function = erector.identifier = SingleValueQueryPart.make_template_factory(Identifier);
+export const l: Function = erector.literal = SingleValueQueryPart.make_template_factory(Literal);
 
 // TODO: should this return a Statement?
 erector.if = (test: any, pass: any, fail: any): any => {
@@ -310,9 +329,9 @@ const cmp_subquery: {
     const text_parts: string[] = [];
     const params: any[] = [];
 
-    if (a instanceof EscapedQueryPart) {
+    if (a instanceof QueryPart) {
       text_parts.push(a.placeholder);
-      params.push(a.value);
+      params.push(a.param());
     } else {
       text_parts.push('??');
       params.push(a);
@@ -323,9 +342,9 @@ const cmp_subquery: {
     const b_parts: string[] = [];
 
     _.each(b_array, (b_element: any) => {
-      if (b_element instanceof EscapedQueryPart) {
+      if (b_element instanceof QueryPart) {
         b_parts.push(b_element.placeholder);
-        params.push(b_element.value);
+        params.push(b_element.param());
       } else {
         b_parts.push('?');
         params.push(b_element);
@@ -358,9 +377,9 @@ const cmp: {
     const text_parts: string[] = [];
     const params: any[] = [];
 
-    if (a instanceof EscapedQueryPart) {
+    if (a instanceof QueryPart) {
       text_parts.push(a.placeholder);
-      params.push(a.value);
+      params.push(a.param());
     } else {
       text_parts.push('??');
       params.push(a);
@@ -368,9 +387,9 @@ const cmp: {
 
     text_parts.push(operator);
 
-    if (b instanceof EscapedQueryPart) {
+    if (b instanceof QueryPart) {
       text_parts.push(b.placeholder);
-      params.push(b.value);
+      params.push(b.param());
     } else {
       text_parts.push('?');
       params.push(b);
@@ -415,9 +434,9 @@ erector.set = (obj: { [key: string]: any }, options: SetOptions = {}): Statement
 
     params.push(key);
 
-    if (value instanceof EscapedQueryPart) {
+    if (value instanceof QueryPart) {
       text_parts.push(`??=${value.placeholder}`);
-      params.push(value.value);
+      params.push(value.param());
     } else {
       text_parts.push('??=?');
       params.push(value);
