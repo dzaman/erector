@@ -5,6 +5,7 @@ const assert = require('assert');
 
 // TODO: configuration option -> generate strings or Statements
 // TODO: configuration option -> left operand default type is identifier
+// TODO: configuration option -> .array to treat a array vs. .list to expand
 // QUESTION: Object or object?
 
 /**
@@ -23,8 +24,8 @@ export abstract class QueryPart {
 
   public abstract format(): string;
 
-  // public abstract text(): string;
-  // public abstract values(): any[];
+  public abstract text(): string;
+  public abstract params(): any;
 
   public toString(): string {
     return this.format();
@@ -35,12 +36,20 @@ export abstract class QueryPart {
 export abstract class EscapedQueryPart extends QueryPart {
 
   public readonly value: any;
-  public readonly abstract placeholder: string;
+  public readonly placeholder: string;
 
   constructor(value: any) {
     super();
 
     this.value = value;
+  }
+
+  public text(): string {
+    return this.placeholder;
+  }
+
+  public params(): any {
+    return this.value;
   }
 
   public static make_template_factory(target_class: QueryPartConstructor) {
@@ -139,88 +148,136 @@ export class Statement extends QueryPart {
     this.params = params;
   }
 
+  public text(): string {
+    return this.text;
+  }
+
+  public params(): string {
+    return this.params;
+  }
+
   public format(): string {
     return (<typeof Statement>this.constructor).escape(this.text, this.params).toString();
   }
 
 }
 
+// NOTE: exp is mutated
+const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
+  while (typeof exp === 'function') {
+    exp = exp();
+  }
+
+  return exp;
+}
+
 /**
  * @param strings   Comment for `strings`
  */
 export const erector = (strings: string[], ...exps: any[]) => {
-  //  // const string = strings.join('?');
-  //  let strings_and_placeholders = [];
-  //
-  //  const lists = {};
-  //
-  //  for (let i = 0; i < exps.length; i += 1) {
-  //    const exp = exps[i];
-  //    if (typeof exp === 'function') {
-  //      exp = exp();
-  //    } else if (exp instanceof Statement) {
-  //      exp = escape(exp.string, exp.params).toString();
-  //    } else if (exp instanceof ListLabels || exps[i] instanceof ListValues) {
-  //      const key = exp.name || undefined;
-  //
-  //      if (exp.content) {
-  //        if (lists[key]) {
-  //          // deep inequality is an error
-  //        } else {
-  //          lists[key] = exp;
-  //        }
-  //      } else if (!(key in lists)) {
-  //        lists[key] = undefined;
-  //      }
-  //    }
-  //  }
-  //
-  //  _.each(lists, (value, key) => {
-  //    if (value === undefined) {
-  //      // throw error for key
-  //    }
-  //  });
-  //
-  //  for (let i = 0; i < strings.length - 1; i += 1) {
-  //    const exp = exps[i];
-  //    const count = _.isArray(exp) ? _.size(exp) : 1;
-  //
-  //    console.log('count', count);
-  //
-  //    if (exp instanceof Raw) {
-  //      strings_and_placeholders.push(strings[i]);
-  //      strings_and_placeholders.push(exp.format());
-  //    } else if (exp instanceof ListLabels || exp instanceof ListValues) {
-  //      const key = exp.name;
-  //      const { 
-  //        content,
-  //        array,
-  //        object,
-  //      } = lists[key].content; 
-  //
-  //      if (exp instanceof ListLabels) {
-  //        const labels = exp.array ? exp.array : _.values(exp.object);
-  //        // array of identifiers that should be escaped unless they are raw
-  //      } else if (exp instanceof ListValues) {
-  //        const values = exp.array ? exp.array : _.keys(exp.object);
-  //        // array of literals that should be escaped unless they are raw
-  //      }
-  //    } else {
-  //      if (strings[i][strings[i].length - 1] === '"' &&
-  //          strings[i + 1][0] === '"') {
-  //        strings_and_placeholders.push(strings[i].substring(0, strings[i].length - 1));
-  //        strings_and_placeholders.push(_.range(count).map(() => '??').join(', '));
-  //        strings[i + 1] = strings[i + 1].substring(1);
-  //      } else {
-  //        strings_and_placeholders.push(strings[i]);
-  //        strings_and_placeholders.push(_.range(count).map(() => '?').join(', '));
-  //      }
-  //    }
-  //
-  //  }
-  //
+
+  // statement -> treat as raw w/ statement as value
+  // function -> eval... recursively?
+  // listlabels/values -> treat as statement
+  // arrays -> treat as statement
+
+  let text_parts: string[] = [];
+  let params: any[] = [];
+
+  const lists = {};
+  for (let i = 0; i < exps.length; i += 1) {
+    const exp = _resolve_function_recursively(exps[i]);
+
+    if (exp instanceof ListLabels || exps instanceof ListValues) {
+      // TODO: list tracking -- but do it on the objects themselves
+      // const key = exp.name || undefined;
+      //  
+      // if (exp.content) {
+      //   if (lists[key]) {
+      //     // deep inequality is an error
+      //   } else {
+      //     lists[key] = exp;
+      //   }
+      // } else if (!(key in lists)) {
+      //   lists[key] = undefined;
+      // }
+
+      // TODO: how to construct statement
+      // exp = new Statement(...);
+    }
+
+    if (exp instanceof statement) {
+      exp = new Raw(exp);
+    }
+  }
+
+  // make sure lists are defined
+  _.each(lists, (value, key) => {
+    if (value === undefined) {
+      // throw error for key
+    }
+  });
+
+  for (let i = 0; i < strings.length - 1; i += 1) {
+    const exp = exps[i];
+    const count = _.isArray(exp) ? _.size(exp) : 1;
+
+    const is_double_quoted  = strings[i][strings[i].length - 1] === '"' && strings[i + 1][0] === '"';
+    const is_identifier = is_double_quoted || exp instanceof Identifier;
+
+    if (exp instanceof e
+    
+    // pushing on as ?/??/??? with the value added to the list would...
+    // could also push the whole instance (e.g. Raw) and insert ???
+    // returning a single string ... no need for statements
+    if (exp instanceof EscapedQueryPart) {
+      // exp and strings may have nothing to do with one another, e.g.: 
+      //    SELECT * FROM "${foo}" will be broken down into 'SELECT FROM * "'
+      //    and foo
+      text_parts.push(strings[i]);
+      // this is always ???
+      text_parts.push(exp.placeholder);
+      params.push(exp.value);
+    } else if (exp instanceof Statement) {
+      text_parts.push('???');
+      params.push(exp);
+    //} else if (exp instanceof ListLabels || exp instanceof ListValues) {
+    //  const key = exp.name;
+    //  const { 
+    //    content,
+    //    array,
+    //    object,
+    //  } = lists[key].content; 
+    // 
+    //  if (exp instanceof ListLabels) {
+    //    const labels = exp.array ? exp.array : _.values(exp.object);
+    //    // array of identifiers that should be escaped unless they are raw
+    //  } else if (exp instanceof ListValues) {
+    //    const values = exp.array ? exp.array : _.keys(exp.object);
+    //    // array of literals that should be escaped unless they are raw
+    //  }
+    } else {
+      // default treatment is ?? within "" and ? otherwise
+      if (strings[i][strings[i].length - 1] === '"' &&
+          strings[i + 1][0] === '"') {
+        // push the beginning part of the string up to '"'
+        text_parts.push(strings[i].substring(0, strings[i].length - 1));
+        // push all of the placeholders onto the string
+        text_parts.push(_.range(count).map(() => '??').join(', '));
+        // trim the preceeding '"' from the next string
+        strings[i + 1] = strings[i + 1].substring(1);
+      } else {
+        // push the string as-is
+        text_parts.push(strings[i]);
+        // push all of the placeholders onto the string
+        text_parts.push(_.range(count).map(() => '?').join(', '));
+      }
+    }
+  
+  }
+  //  
   //  return new Statement(
-  //    strings_and_placeholders.join(''),
+  //    text_parts.join(''),
   //    _.flatten(_.filter(exps, (exp) => !(exp instanceof Raw))),
   //  );
 }
