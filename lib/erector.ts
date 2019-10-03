@@ -90,26 +90,6 @@ export abstract class KnexFormattedSingleValueQueryPart extends SingleValueQuery
 
 }
 
-// https://www.bryntum.com/blog/the-mixin-pattern-in-typescript-all-you-need-to-know/
-//
-//export type AnyFunction<A = any> = (...input: any[]) => A;
-//export type AnyConstructor<A = object> = new (...input: any[]) => A;
-//export type Mixin<T extends AnyFunction> = InstanceType<ReturnType<T>>;
-//
-//export const KnexFormatted = <T extends AnyConstructor<object>>(base : T) => 
-//  class KnexFormatted extends base {
-//
-//    abstract placeholder;
-//    abstract value;
-//
-//    public format(): string {
-//      return (<typeof KnexFormatted>this.constructor).escape(this.placeholder, this.value).toString();
-//    }
-//
-//  };
-// 
-// export type KnexFormatted = Mixin<typeof KnexFormatted>;
-
 export class Literal extends KnexFormattedSingleValueQueryPart {
 
   public placeholder = '?';
@@ -124,7 +104,7 @@ export class Identifier extends KnexFormattedSingleValueQueryPart {
 
 export abstract class List extends MultiValueQueryPart {
 
-  public name?: string;
+  public name: string;
   public content?: any[] | object;
   public source?: List;
 
@@ -135,15 +115,17 @@ export abstract class List extends MultiValueQueryPart {
   constructor(...args: any[]) {
     super();
 
-    if (_.isString(args[0])) {
-      this.name = name;
-    }
+    this.name = _.isString(args[0]) ? args[0] : '_';
 
     for (let i = 0; i < args.length; i++) {
       if (_.isArray(args[i]) || _.isObject(args[i])) {
         this.content = args[i];
       }
     }
+  }
+
+  public is_source(): boolean {
+    return !_.isUndefined(this.content);
   }
 
   public format(): string {
@@ -182,123 +164,86 @@ export class Statement extends MultiValueQueryPart {
 
 
 // // NOTE: exp is mutated
-// const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
-//   while (typeof exp === 'function') {
-//     exp = exp();
-//   }
-// 
-//   return exp;
-// }
+const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
+  while (typeof exp === 'function') {
+    exp = exp();
+  }
+
+  return exp;
+}
 
 /**
  * @param strings   Comment for `strings`
  */
 export const erector = (strings: string[], ...exps: any[]) => {
-//
-//  // statement -> treat as raw w/ statement as value
-//  // function -> eval... recursively?
-//  // listlabels/values -> treat as statement
-//  // arrays -> treat as statement
-//
-//  let text_parts: string[] = [];
-//  let params: any[] = [];
-//
-//  const lists = {};
-//  for (let i = 0; i < exps.length; i += 1) {
-//    const exp = _resolve_function_recursively(exps[i]);
-//
-//    // if (exp instanceof ListLabels || exps instanceof ListValues) {
-//    //   // TODO: list tracking -- but do it on the objects themselves
-//    //   // const key = exp.name || undefined;
-//    //   //  
-//    //   // if (exp.content) {
-//    //   //   if (lists[key]) {
-//    //   //     // deep inequality is an error
-//    //   //   } else {
-//    //   //     lists[key] = exp;
-//    //   //   }
-//    //   // } else if (!(key in lists)) {
-//    //   //   lists[key] = undefined;
-//    //   // }
-//    //
-//    //   // TODO: how to construct statement
-//    //   // exp = new Statement(...);
-//    // }
-//
-//    if (exp instanceof Statement) {
-//      exp = new Raw(exp);
-//    }
-//  }
-//
-//  // make sure lists are defined
-//  _.each(lists, (value, key) => {
-//    if (value === undefined) {
-//      // throw error for key
-//    }
-//  });
-//
-//  for (let i = 0; i < strings.length - 1; i += 1) {
-//    const exp = exps[i];
-//    const count = _.isArray(exp) ? _.size(exp) : 1;
-//
-//    const is_double_quoted  = strings[i][strings[i].length - 1] === '"' && strings[i + 1][0] === '"';
-//    const is_identifier = is_double_quoted || exp instanceof Identifier;
-//
-//    if (exp instanceof e
-//    
-//    // pushing on as ?/??/??? with the value added to the list would...
-//    // could also push the whole instance (e.g. Raw) and insert ???
-//    // returning a single string ... no need for statements
-//    if (exp instanceof QueryPart) {
-//      // exp and strings may have nothing to do with one another, e.g.: 
-//      //    SELECT * FROM "${foo}" will be broken down into 'SELECT FROM * "'
-//      //    and foo
-//      text_parts.push(strings[i]);
-//      // this is always ???
-//      text_parts.push(exp.placeholder);
-//      params.push(exp.value);
-//    } else if (exp instanceof Statement) {
-//      text_parts.push('???');
-//      params.push(exp);
-//    //} else if (exp instanceof ListLabels || exp instanceof ListValues) {
-//    //  const key = exp.name;
-//    //  const { 
-//    //    content,
-//    //    array,
-//    //    object,
-//    //  } = lists[key].content; 
-//    // 
-//    //  if (exp instanceof ListLabels) {
-//    //    const labels = exp.array ? exp.array : _.values(exp.object);
-//    //    // array of identifiers that should be escaped unless they are raw
-//    //  } else if (exp instanceof ListValues) {
-//    //    const values = exp.array ? exp.array : _.keys(exp.object);
-//    //    // array of literals that should be escaped unless they are raw
-//    //  }
-//    } else {
-//      // default treatment is ?? within "" and ? otherwise
-//      if (strings[i][strings[i].length - 1] === '"' &&
-//          strings[i + 1][0] === '"') {
-//        // push the beginning part of the string up to '"'
-//        text_parts.push(strings[i].substring(0, strings[i].length - 1));
-//        // push all of the placeholders onto the string
-//        text_parts.push(_.range(count).map(() => '??').join(', '));
-//        // trim the preceeding '"' from the next string
-//        strings[i + 1] = strings[i + 1].substring(1);
-//      } else {
-//        // push the string as-is
-//        text_parts.push(strings[i]);
-//        // push all of the placeholders onto the string
-//        text_parts.push(_.range(count).map(() => '?').join(', '));
-//      }
-//    }
-//  
-//  }
-//  //  
-//  //  return new Statement(
-//  //    text_parts.join(''),
-//  //    _.flatten(_.filter(exps, (exp) => !(exp instanceof Raw))),
-//  //  );
+
+  let text_parts: string[] = [];
+  let params: any[] = [];
+
+  const list_sources: { [key: string]: List } = {};
+  const list_references: { [key: string]: List[] } = {};
+
+  for (let i = 0; i < exps.length; i += 1) {
+    const exp = _resolve_function_recursively(exps[i]);
+
+    if (exp instanceof List) {
+      if (exp.is_source()) {
+        if (list_sources[exp.name]) {
+          if (!_.isEqual(exp, list_sources[exp.name])) {
+            throw Error(`${exp.name} has two different values in this context`);
+          }
+        } else {
+          list_sources[exp.name] = exp;
+        }
+      } else {
+        if (!(exp.name in list_references)) {
+          list_references[exp.name] = [];
+        }
+
+        list_references[exp.name].push(exp);
+      }
+    }
+  }
+
+  // make sure lists are defined
+  _.each(list_references, (lists: List[], key: string) => {
+    _.each(lists, (list: List) => {
+      if (key in list_sources) {
+        list.source = list_sources[key];
+      } else {
+        throw Error(`no source found for ${key}`);
+      }
+    });
+  });
+
+  for (let i = 0; i < strings.length - 1; i += 1) {
+    const exp = exps[i];
+
+    const current_string = strings[i];
+    const next_string = strings[i + 1];
+    const is_double_quoted  = current_string[current_string.length - 1] === '"' && next_string[0] === '"';
+
+    // trim the double quote off of the right string so we can use it as-is next iteration
+    // we do not need to modify the left string in-place
+    if (is_double_quoted) {
+      strings[i + 1] = next_string.substring(1);
+    }
+
+    // push the left/current string onto the text list
+    text_parts.push(is_double_quoted ? current_string.substring(0, current_string.length - 1) : current_string);
+
+    // push the placeholder for the current exp onto the text list
+    text_parts.push(exp.placeholder);
+
+    // push exp onto the param list, wrapping if double-quoted and not already an Identifier
+    const wrap_with_identifier = is_double_quoted && !(exp instanceof Identifier);
+    params.push(wrap_with_identifier ? new Identifier(exp) : exp);
+  }
+
+  return new Statement(
+    text_parts.join(''),
+    params
+  );
 }
 
 export const raw: Function = erector.raw = SingleValueQueryPart.make_template_factory(Raw);
