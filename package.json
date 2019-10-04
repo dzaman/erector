@@ -6,7 +6,8 @@
   "scripts": {
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
     "test": "node_modules/.bin/jest",
-    "test+tsc": "node_modules/.bin/tsc --noEmit -p . && npm test"
+    "test+tsc": "node_modules/.bin/tsc --noEmit -p . && npm test",
+    "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
   "author": "Matthew Dzaman <matthew@dzaman.org>",
   "license": "MIT",

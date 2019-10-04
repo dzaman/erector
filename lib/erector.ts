@@ -26,11 +26,15 @@ export const escape = (statement: string, values: any): string => {
   const escaped_string = statement.replace(/\\\?|\?{1,3}/g, (match) => {
     // escaped questionmarks don't count
     if (match === '\\?') {
-      return match;
+      return '?';
     }
 
-    const value = values_array[index];
+    let value = values_array[index];
     index += 1;
+
+    if (value instanceof QueryPart) {
+      value = value.param();
+    }
 
     if (match.length === 3) {
       // catch undefined?
@@ -171,8 +175,12 @@ export abstract class List extends MultiValueQueryPart {
       throw Error('cannot set the source of a source');
     }
 
-    if (source.is_source()) {
+    if (!source.is_source()) {
       throw Error('cannot set the source to be a non-source list');
+    }
+
+    if (this.name !== source.name) {
+      throw Error(`source has a different name (${this.name} != ${source.name})`);
     }
 
     this.source = source;
@@ -187,7 +195,7 @@ export abstract class List extends MultiValueQueryPart {
   public format(): string {
 
     if (!this.is_source() && (!this.source || !this.source.is_source())) {
-      throw Error('no list source is available');
+      throw Error('No list source is available');
     }
 
     // we know this to be true
@@ -302,7 +310,16 @@ const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
 /**
  * @param strings   Comment for `strings`
  */
-export const erector = (strings: string[], ...exps: any[]) => {
+export const erector = (_strings: string[], ..._exps: any[]) => {
+  const strings: string[] = _.clone(_strings);
+  const exps: any[] = _.clone(_exps);
+
+  // return _generate_statement(
+  //   strings,
+  //   _set_list_sources(
+  //     _resolve_functions_recursively(exps)
+  //   )
+  // );
 
   let text_parts: string[] = [];
   let params: any[] = [];
@@ -311,7 +328,7 @@ export const erector = (strings: string[], ...exps: any[]) => {
   const list_references: { [key: string]: List[] } = {};
 
   for (let i = 0; i < exps.length; i += 1) {
-    const exp = _resolve_function_recursively(exps[i]);
+    const exp = exps[i] = _resolve_function_recursively(exps[i]);
 
     if (exp instanceof List) {
       if (exp.is_source()) {
@@ -338,7 +355,7 @@ export const erector = (strings: string[], ...exps: any[]) => {
       if (key in list_sources) {
         list.set_source(list_sources[key]);
       } else {
-        throw Error(`no source found for ${key}`);
+        throw Error(`No source found for ${key}`);
       }
     });
   });
@@ -348,7 +365,7 @@ export const erector = (strings: string[], ...exps: any[]) => {
 
     const current_string = strings[i];
     const next_string = strings[i + 1];
-    const is_double_quoted  = current_string[current_string.length - 1] === '"' && next_string[0] === '"';
+    const is_double_quoted = current_string[current_string.length - 1] === '"' && next_string[0] === '"';
 
     // trim the double quote off of the right string so we can use it as-is next iteration
     // we do not need to modify the left string in-place
@@ -359,13 +376,18 @@ export const erector = (strings: string[], ...exps: any[]) => {
     // push the left/current string onto the text list
     text_parts.push(is_double_quoted ? current_string.substring(0, current_string.length - 1) : current_string);
 
+    // TODO: access ? from Literal
     // push the placeholder for the current exp onto the text list
-    text_parts.push(exp.placeholder);
+    const placeholder = is_double_quoted ? '??' : '?';
+    text_parts.push(exp instanceof QueryPart ? exp.placeholder : placeholder);
 
     // push exp onto the param list, wrapping if double-quoted and not already an Identifier
-    const wrap_with_identifier = is_double_quoted && !(exp instanceof Identifier);
-    params.push(wrap_with_identifier ? new Identifier(exp) : exp);
+    // don't prevent double-wrapping magically 
+    // const wrap_with_identifier = is_double_quoted && !(exp instanceof Identifier);
+    params.push(is_double_quoted ? new Identifier(exp) : exp);
   }
+
+  text_parts.push(strings[strings.length - 1]);
 
   return new Statement(
     text_parts.join(''),
@@ -540,7 +562,7 @@ erector.setdefined = (obj: object, options: SetOptions = {}): Statement | string
   return erector.set(defined_object, options);
 };
 
-const values: {
+export const values: {
   (): ListValues;
   (name: string): ListValues;
   (content: any[] | object): ListValues;
@@ -551,7 +573,7 @@ const values: {
 
 erector.values = values;
 
-const labels: {
+export const labels: {
   (): ListLabels;
   (name: string): ListLabels;
   (content: any[] | object): ListLabels;

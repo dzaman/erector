@@ -16,6 +16,9 @@ const {
   l,
   raw,
 
+  labels,
+  values,
+
   Statement,
 } = require('../lib/erector');
 
@@ -28,6 +31,26 @@ describe('escape', () => {
 
   test('text is passed through', () => {
     expect(escape('the quick brown fox')).toBe('the quick brown fox');
+  });
+
+  test('escaped quotes are ignored', () => {
+    expect(escape('the quick brown fox\\?')).toBe('the quick brown fox?');
+  });
+
+  test.each([
+    [
+      'errors when there are too many placeholders',
+      '? ??',
+      ['a'],
+      'Expected 1 bindings, saw 2',
+    ], [
+      'errors when there are too few placeholders',
+      '? ??',
+      ['a', 'b', 'c'],
+      'Expected 3 bindings, saw 2',
+    ]
+  ])('%p', (_name, text, params, expected) => {
+    expect(() => escape(text, params)).toThrow(expected);
   });
 
   describe('literals', () => {
@@ -72,6 +95,10 @@ describe('Raw', () => {
   test('text is passed through as-is', () => {
     expect((new Raw('Bobby; DROP "user"').format())).toBe('Bobby; DROP "user"');
   });
+
+  test('raw supports templates', () => {
+    expect(raw`x ${'y'} z`).toStrictEqual(new Raw('x y z'));
+  });
 });
 
 describe('Identifier', () => {
@@ -92,6 +119,10 @@ describe('Identifier', () => {
   test('i/identifier equls new Identifier()', () => {
     expect(i`fox.user`).toStrictEqual(new Identifier('fox.user'));
   });
+
+  test('i supports templates', () => {
+    expect(i`x ${'y'} z`).toStrictEqual(new Identifier('x y z'));
+  });
 });
 
 describe('Literal', () => {
@@ -111,6 +142,10 @@ describe('Literal', () => {
 
   test('l/literal equals new Literal()', () => {
     expect(l`F'oo`).toStrictEqual(new Literal(`F'oo`));
+  });
+
+  test('l supports templates', () => {
+    expect(l`x ${'y'} z`).toStrictEqual(new Literal('x y z'));
   });
 });
 
@@ -133,24 +168,49 @@ describe('List', () => {
       expect(list.is_source()).toEqual(is_source);
     });
 
-    // test.each([
-    //   [[new Literal('a'), new Literal(2)], `'a', 2`],
-    //   [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
-    // ])('format %p -> %p', (content, expected) => {
-    //   const list = new class_ref(content);
-    //   expect(list.format()).toBe(expected);
-    // });
+    test.each([
+      [[new Literal('a'), new Literal(2)], `'a', 2`],
+      [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
+    ])('format with override %p -> %p', (content, expected) => {
+      const list = new class_ref(content);
+      expect(list.format()).toBe(expected);
+    });
+
+    test('errors when formatting without a source (no source)', () => {
+      const list = new class_ref();
+      expect(() => list.format()).toThrow('No list source is available');
+    });
+
+    test('errors when formatting without a source (source is not a source)', () => {
+      const list = new class_ref();
+      list.source = list;
+      expect(() => list.format()).toThrow('No list source is available');
+    });
+
   });
 
   describe('ListValues', () => {
     test.each([
-      [['a', 'b'], `'a', 'b'`],
-      [{ a: 1, b: 2 }, `1, 2`],
-      [[new Literal('a'), new Literal(2)], `'a', 2`],
-      [{ a: new Literal('a'), b: new Literal(2) }, `'a', 2`],
-      [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
-      [{ a: new Raw('foo()'), b: new Identifier('bar') }, `foo(), "bar"`],
-    ])('format %p -> %p', (content, expected) => {
+      [
+        ['a', 'b'],
+        `'a', 'b'`
+      ], [
+        { a: 1, b: 2 },
+        `1, 2`
+      ], [
+        [new Literal('a'), new Literal(2)],
+        `'a', 2`
+      ], [
+        { a: new Literal('a'), b: new Literal(2) },
+        `'a', 2`
+      ], [
+        [new Raw('foo()'), new Identifier('bar')],
+        `foo(), "bar"`
+      ], [
+        { a: new Raw('foo()'), b: new Identifier('bar') },
+        `foo(), "bar"`
+      ],
+    ])('format with default %p -> %p', (content, expected) => {
       const list = new ListValues(content);
       expect(list.format()).toBe(expected);
     });
@@ -158,20 +218,97 @@ describe('List', () => {
 
   describe('ListLabels', () => {
     test.each([
-      [['a', 'b'], '"a", "b"'],
-      [{ a: 1, b: 2 }, '"a", "b"'],
-      [[new Literal('a'), new Literal(2)], `'a', 2`],
-      [{ a: new Literal('a'), b: new Literal(2) }, `"a", "b"`],
-      [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
-      [{ a: new Raw('foo()'), b: new Identifier('bar') }, `"a", "b"`],
+      [
+        ['a', 'b'],
+        '"a", "b"',
+      ], [
+        { a: 1, b: 2 },
+        '"a", "b"',
+      ], [
+        [new Literal('a'), new Literal(2)],
+        `'a', 2`,
+      ], [
+        { a: new Literal('a'), b: new Literal(2) },
+        `"a", "b"`,
+      ], [
+        [new Raw('foo()'), new Identifier('bar')],
+        `foo(), "bar"`,
+      ], [
+        { a: new Raw('foo()'), b: new Identifier('bar') },
+        `"a", "b"`,
+      ],
     ])('format %p -> %p', (content, expected) => {
       const list = new ListLabels(content);
       expect(list.format()).toBe(expected);
     });
   });
+
+  describe('ListValues & ListLabels', () => {
+    test.each([
+      [
+        new ListLabels(),
+        new ListValues({ a: 1, b: 2 }),
+        '"a", "b"',
+      ], [
+        new ListValues(),
+        new ListLabels({ a: 1, b: 2 }),
+        `1, 2`,
+      ],
+    ])('%o come from %o source', (target, source, expected) => {
+      target.set_source(source);
+      expect(target.format()).toBe(expected);
+    });
+
+    test.each([
+      [
+        'cannot set the source of a source', 
+        new ListValues([true]),
+        new ListValues([true]),
+        undefined,
+      ], [
+        'cannot set the source to be a non-source list',
+        new ListValues(),
+        new ListValues(),
+        undefined,
+      ], [
+        'cannot set the source for a different name',
+        new ListValues('foo'),
+        new ListValues('bar', [true]),
+        'source has a different name (foo != bar)',
+      ]
+    ])('%p', (name, destination, source, custom_expected) => {
+      const expected = custom_expected ? custom_expected : name;
+      expect(() => destination.set_source(source)).toThrow(expected);
+    });
+
+  });
+
 });
 
 describe('erector', () => {
+
+  describe('template', () => {
+    test.each([
+      ['placeholder at end', erector`hello ${'world'}`, `hello 'world'`],
+      ['placeholder in between', erector`hello ${'world'}!`, `hello 'world'!`],
+      ['placeholder at beginning', erector`${'goodbye'} world`, `'goodbye' world`],
+      ['identifier override', erector`hello ${i`world`}`, `hello "world"`],
+      ['double quotes trigger identifier override', erector`hello "${'world as w'}"`, `hello "world" as "w"`],
+      ['lists values are expanded', erector`goodbye ${values(['cruel', 'world'])}`, `goodbye 'cruel', 'world'`],
+      ['lists labels are expanded', erector`goodbye ${labels(['cruel', 'world'])}`, `goodbye "cruel", "world"`],
+      ['lists values and labels are linked', erector`insert into (${labels()}) values (${values({ a: 'foo', b: 'bar' })})`, `insert into ("a", "b") values ('foo', 'bar')`],
+      ['functions are resolved', erector`hello ${() => 'world'}`, `hello 'world'`],
+    ])('%p', (_name, result, expected) => {
+      expect(result.toString()).toBe(expected);
+    });
+
+    test.each([
+      ['sources, if both defined, must be the same', () => { erector`insert into (${labels('foo', [1])}) values (${values('foo', [2])})` }, 'foo has two different values in this context'],
+      ['sources must be defined', () => { erector`insert into (${labels('foo')}) values (${values('bar')})` }, 'No source found for foo'],
+    ])('%', (_name, fn, expected) => {
+      expect(fn).toThrowError(expected);
+    });
+  });
 
   describe('if', () => {
     test.each([
@@ -274,6 +411,49 @@ describe('erector', () => {
     test(`operator is defaulted to 'in'`, () => {
       expect(
         erector.cmp_subquery('a', ['b'])
+      )
+      .toStrictEqual(
+        new Statement('?? IN (?)', ['a', 'b'])
+      );
+    });
+
+    test('operator can be overridden', () => {
+      expect(
+        erector.cmp_subquery('a', 'NOT IN', ['b'])
+      )
+      .toStrictEqual(
+        new Statement('?? NOT IN (?)', ['a', 'b']) 
+      );
+    });
+
+    test('returns empty string if list is empty', () => {
+      expect(
+        erector.cmp_subquery('a', [])
+      )
+      .toBe('')
+    });
+
+    test('left operand can be literal', () => {
+      expect(
+        erector.cmp_subquery(l`a`, ['b'])
+      )
+      .toStrictEqual(
+        new Statement('? IN (?)', ['a', 'b'])
+      );
+    });
+
+    test('right operand can be identifier or raw', () => {
+      expect(
+        erector.cmp_subquery('a', [i`b`, raw`c()`])
+      )
+      .toStrictEqual(
+        new Statement(`?? IN (??, ???)`, ['a', 'b', 'c()'])
+      );
+    });
+
+    test('right operand is converted to an array if it is not', () => {
+      expect(
+        erector.cmp_subquery('a', 'b')
       )
       .toStrictEqual(
         new Statement('?? IN (?)', ['a', 'b'])
