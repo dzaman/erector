@@ -9,12 +9,17 @@ const {
   Literal,
   Raw,
 
+  ListValues,
+  ListLabels,
+
   i,
   l,
   raw,
 
   Statement,
 } = require('../lib/erector');
+
+// TODO: define when to use each
 
 describe('escape', () => {
   test('is exported function', () => {
@@ -34,7 +39,7 @@ describe('escape', () => {
       expect(escape('the quick brown ?', arg)).toBe(`the quick brown 'f''ox'`);
     });
 
-    test('named literals are supported', () => {
+    test.skip('named literals are supported', () => {
       expect(escape('the quick brown :animal', { animal: 'fox' })).toBe(`the quick brown 'fox'`);
     });
 
@@ -53,7 +58,7 @@ describe('escape', () => {
       expect(escape('the quick brown ??', arg)).toBe('the quick brown "fox"."user"');
     });
 
-    test('named identifiers are supported', () => {
+    test.skip('named identifiers are supported', () => {
       expect(escape('the quick brown :animal:', { animal: 'fox' })).toBe('the quick brown "fox"');
     });
   });
@@ -106,6 +111,63 @@ describe('Literal', () => {
 
   test('l/literal equals new Literal()', () => {
     expect(l`F'oo`).toStrictEqual(new Literal(`F'oo`));
+  });
+});
+
+describe('List', () => {
+  describe.each([
+    ListValues,
+    ListLabels,
+  ])('%p (shared)', (class_ref) => {
+    test.each([
+      [[], '_', undefined, false],
+      [['foo'], 'foo', undefined, false],
+      [[['a']], '_', ['a'], true],
+      [[{ a: 1 }], '_', { a: 1 }, true],
+      [['foo', ['a']], 'foo', ['a'], true],
+      [['foo', { a: 1 }], 'foo', { a: 1 }, true],
+    ])('can be constructed with %p -> name: %p, content: %p, is_source: %p', (params, name, content, is_source) => {
+      const list = new class_ref(...params);
+      expect(list.name).toEqual(name);
+      expect(list.content).toEqual(content);
+      expect(list.is_source()).toEqual(is_source);
+    });
+
+    // test.each([
+    //   [[new Literal('a'), new Literal(2)], `'a', 2`],
+    //   [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
+    // ])('format %p -> %p', (content, expected) => {
+    //   const list = new class_ref(content);
+    //   expect(list.format()).toBe(expected);
+    // });
+  });
+
+  describe('ListValues', () => {
+    test.each([
+      [['a', 'b'], `'a', 'b'`],
+      [{ a: 1, b: 2 }, `1, 2`],
+      [[new Literal('a'), new Literal(2)], `'a', 2`],
+      [{ a: new Literal('a'), b: new Literal(2) }, `'a', 2`],
+      [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
+      [{ a: new Raw('foo()'), b: new Identifier('bar') }, `foo(), "bar"`],
+    ])('format %p -> %p', (content, expected) => {
+      const list = new ListValues(content);
+      expect(list.format()).toBe(expected);
+    });
+  });
+
+  describe('ListLabels', () => {
+    test.each([
+      [['a', 'b'], '"a", "b"'],
+      [{ a: 1, b: 2 }, '"a", "b"'],
+      [[new Literal('a'), new Literal(2)], `'a', 2`],
+      [{ a: new Literal('a'), b: new Literal(2) }, `"a", "b"`],
+      [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
+      [{ a: new Raw('foo()'), b: new Identifier('bar') }, `"a", "b"`],
+    ])('format %p -> %p', (content, expected) => {
+      const list = new ListLabels(content);
+      expect(list.format()).toBe(expected);
+    });
   });
 });
 

@@ -1,7 +1,9 @@
 
 module.exports = {
-  // pass this in via the command line if possible or invoke a separate config for CI/pre-commit
-  // collectCoverage: true,
+  // can pass this in via the command line or invoke a separate config for CI/pre-commit
+  // but the current time difference is very minor (10s of ms max)
+  // npm test -- --collect-coverage
+  collectCoverage: true,
   verbose: true,
   testMatch: ['**/tests/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
   transform: {

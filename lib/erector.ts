@@ -11,7 +11,45 @@ const assert = require('assert');
  * @param statement A SQL string with literal (?, :name) and identifier (??, :name:) placeholders
  * @param args      Single value, array of positional values, or object of named values
  */
-export const escape = (statement: string, arg: any): string => knex.raw(statement, arg).toString();
+// export const escape = (statement: string, arg: any): string => knex.raw(statement, arg).toString();
+export const escape = (statement: string, values: any): string => {
+  let values_array: any[] = [];
+  if (_.isArray(values)) {
+    values_array = values;
+  } else if (values) {
+    values_array = [values];
+  }
+
+  const expected_bindings = values_array.length;
+  let index = 0;
+
+  const escaped_string = statement.replace(/\\\?|\?{1,3}/g, (match) => {
+    // escaped questionmarks don't count
+    if (match === '\\?') {
+      return match;
+    }
+
+    const value = values_array[index];
+    index += 1;
+
+    if (match.length === 3) {
+      // catch undefined?
+      return `${value}`;
+    }
+
+    if (match.length === 2) {
+      return knex.raw('??', value).toString();
+    }
+
+    return knex.raw('?', value).toString();
+  });
+
+  if (expected_bindings !== index) {
+    throw new Error(`Expected ${expected_bindings} bindings, saw ${index}`);
+  }
+
+  return escaped_string;
+};
 
 interface SingleValueQueryPartConstructor {
   new(value: any): SingleValueQueryPart;
@@ -23,7 +61,7 @@ export abstract class QueryPart {
 
   public abstract placeholder: string;
 
-  public abstract param(): string;
+  public abstract param(): any;
   public abstract format(): string;
 
   public toString(): string {
@@ -36,7 +74,7 @@ export abstract class MultiValueQueryPart extends QueryPart {
 
   public placeholder = '???';
 
-  public param(): string {
+  public param(): any {
     return this.format();
   }
 
@@ -52,8 +90,8 @@ export abstract class SingleValueQueryPart extends QueryPart {
     this.value = value;
   }
 
-  public param(): string {
-    return `${this.value}`;
+  public param(): any {
+    return this.value;
   }
 
   public static make_template_factory(target_class: SingleValueQueryPartConstructor) {
@@ -78,7 +116,7 @@ export class Raw extends SingleValueQueryPart {
   public placeholder = '???';
 
   public format(): string {
-    return this.value;
+    return `${this.value}`;
   }
 }
 
@@ -124,25 +162,114 @@ export abstract class List extends MultiValueQueryPart {
     }
   }
 
+  public set_source(source: List): void {
+    // if (this.content && !_.isEqual(this.content, source.content)) {
+    //   throw Error('content is already defined and source content differs');
+    // }
+
+    if (this.is_source()) {
+      throw Error('cannot set the source of a source');
+    }
+
+    if (source.is_source()) {
+      throw Error('cannot set the source to be a non-source list');
+    }
+
+    this.source = source;
+  }
+
   public is_source(): boolean {
     return !_.isUndefined(this.content);
   }
 
+  protected abstract content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams;
+
   public format(): string {
-    return '';
+
+    if (!this.is_source() && (!this.source || !this.source.is_source())) {
+      throw Error('no list source is available');
+    }
+
+    // we know this to be true
+    const content = this.content || this.source!.content as any[] | object;
+
+    const {
+      placeholders,
+      params,
+    } = this.content_to_placeholders_and_params(content);
+
+    return (<typeof List>this.constructor).escape(placeholders.join(', '), params).toString();
   }
 
 }
 
-class ListLabels extends List {}
+export interface PlaceholderAndParams {
+  placeholders: string[],
+  params: any[],
+}
 
-class ListValues extends List {}
+export class ListLabels extends List {
+
+  protected content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams {
+
+    const placeholders: string[] = [];
+    const params: any[] = [];
+
+    const labels = _.isArray(content) ? content : _.sortBy(_.keys(content));
+
+    _.each(labels, (label: any) => {
+      if (label instanceof QueryPart) {
+        placeholders.push(label.placeholder);
+        params.push(label.param());
+      } else {
+        placeholders.push('??');
+        params.push(label);
+      }
+    });
+
+    return {
+      placeholders,
+      params,
+    };
+
+  }
+
+}
+
+// TODO: should lists ignore undefined values?
+export class ListValues extends List {
+
+  protected content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams {
+
+    const placeholders: string[] = [];
+    const params: any[] = [];
+
+    const values = _.isArray(content) ? content : _.sortBy(_.keys(content)).map((key: any) => (content as any)[key]);
+
+    _.each(values, (value: any) => {
+      if (value instanceof QueryPart) {
+        placeholders.push(value.placeholder);
+        params.push(value.param());
+      } else {
+        // TODO: access Literal.placeholder
+        placeholders.push('?');
+        params.push(value);
+      }
+    });
+
+    return {
+      placeholders,
+      params,
+    }; 
+
+  }
+
+}
 
 // QUESTION: Does this really need to be so restrictive?
 export type StatementParamFunction = (...args: any[]) => StatementParam;
 export type StatementParam = string | number | boolean | QueryPart | StatementParamFunction;
 
-// currently Statements === MultiValueQueryParts, but that may change
 export class Statement extends MultiValueQueryPart {
 
   public readonly text: string;
@@ -209,7 +336,7 @@ export const erector = (strings: string[], ...exps: any[]) => {
   _.each(list_references, (lists: List[], key: string) => {
     _.each(lists, (list: List) => {
       if (key in list_sources) {
-        list.source = list_sources[key];
+        list.set_source(list_sources[key]);
       } else {
         throw Error(`no source found for ${key}`);
       }
