@@ -5,9 +5,12 @@
   "main": "lib/erector.js",
   "scripts": {
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
-    "coveralls": "cat coverage/lcov.info | coveralls",
+    "codecov": "node_modules/.bin/codecov",
+    "compile": "node_modules/.bin/tsc --noEmit -p .",
+    "compile+test": "npm run compile && npm test",
+    "coveralls": "cat coverage/lcov.info | node_modules/.bin/coveralls",
+    "post-coverage": "npm run codecov && npm run coveralls",
     "test": "node_modules/.bin/jest",
-    "test+tsc": "node_modules/.bin/tsc --noEmit -p . && npm test",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
   "author": "Matthew Dzaman <matthew@dzaman.org>",
@@ -20,6 +23,7 @@
     "@types/jest": "^24.0.18",
     "@types/lodash": "^4.14.141",
     "@types/node": "^12.7.5",
+    "codecov": "^3.6.1",
     "coveralls": "^3.0.6",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
