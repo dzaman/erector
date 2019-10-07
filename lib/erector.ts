@@ -1,6 +1,8 @@
 const _ = require('lodash');
 const assert = require('assert');
 
+const escape = require('./escape').escape;
+
 // TODO: configuration option -> generate strings or Statements
 // TODO: configuration option -> left operand default type is identifier
 // TODO: configuration option -> .array to treat a array vs. .list to expand
@@ -78,7 +80,7 @@ export class Raw extends SingleValueQueryPart {
 export abstract class EscapedSingleValueQueryPart extends SingleValueQueryPart {
 
   public format(): string {
-    return (<typeof EscapeSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value).toString();
+    return (<typeof EscapedSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value).toString();
   }
 
 }
