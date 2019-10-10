@@ -115,7 +115,7 @@ describe('escape', () => {
       // this should probably be an error for knex but it is not
       [undefined, false],
       // this is not an error for knex because it treats this as named parameters and ? is not significant
-      [{ a: undefined }, false],
+      // [{ a: undefined }, false],
       [[undefined], true],
       [[[undefined]], true],
       [[{ a: undefined }], true],

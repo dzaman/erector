@@ -230,33 +230,49 @@ function get_undefined_indices(mixed: any): Array<string|number> {
  * @param statement A SQL string with literal (?, :name) and identifier (??, :name:) placeholders
  * @param args      Single value, array of positional values, or object of named values
  */
-export const escape = (statement: string, values: any): string => {
+export const escape = (statement: string, value: any): string => {
   const QueryPart = require('./erector').QueryPart;
 
-  let values_array: any[] = [];
-  if (_.isArray(values)) {
-    values_array = values;
-  } else if (values) {
-    values_array = [values];
-  }
+  if (_.isPlainObject(value)) {
+    return escape_key_bindings(statement, value);
+  } else {
+    let values_array: any[] = [];
 
-  const expected_bindings = values_array.length;
+    if (_.isArray(value)) {
+      values_array = value;
+    } else if (value) {
+      values_array = [value];
+    }
+
+    return escape_placeholder_bindings(statement, values_array);
+  }
+}
+
+export const escape_key_bindings = (statement: string, values: any[]): string => {
+  return statement;
+}
+
+export const escape_placeholder_bindings = (statement: string, values: any[]): string => {
+  const QueryPart = require('./erector').QueryPart;
+
+  const expected_bindings = values.length;
   let index = 0;
 
-  if (contains_undefined(values_array)) {
-    const undefined_binding_indices = get_undefined_indices(values_array);
+  if (contains_undefined(values)) {
+    const undefined_binding_indices = get_undefined_indices(values);
     throw new Error(
       `Undefined binding(s) detected for keys [${undefined_binding_indices}] when compiling RAW query: ${statement}`
     );
   }
 
+  // https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L120
   const escaped_string = statement.replace(/\\\?|\?{1,3}/g, (match) => {
     // escaped questionmarks don't count
     if (match === '\\?') {
       return '?';
     }
 
-    let value = values_array[index];
+    let value = values[index];
     index += 1;
 
     if (index > expected_bindings) {
@@ -278,6 +294,7 @@ export const escape = (statement: string, values: any): string => {
 
     return EscapeLiteral.escape_value(value);
   });
+
 
   if (expected_bindings !== index) {
     throw new Error(`Expected ${expected_bindings} bindings, saw ${index}`);
