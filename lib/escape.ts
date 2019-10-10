@@ -249,10 +249,12 @@ export const escape = (statement: string, value: any): string => {
 }
 
 // https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L149
-export const escape_key_bindings = (statement: string, values: any[]): string => {
+export const escape_key_bindings = (statement: string, values: { [index: string]: any }): string => {
+  const QueryPart = require('./erector').QueryPart;
+
   const regex = /\\?(::(\w+)::|:(\w+):|:(\w+))/g;
 
-  const sql = raw.sql.replace(regex, function(match, p1, p2, p3) {
+  const escaped_string = statement.replace(regex, (match: string, p1: string, p2: string, p3: string, p4: string) => {
     // the string is escaped
     if (match !== p1) {
       return p1;
@@ -278,6 +280,8 @@ export const escape_key_bindings = (statement: string, values: any[]): string =>
 
     return EscapeLiteral.escape_value(value);
   });
+
+  return escaped_string;
 }
 
 // https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L120
