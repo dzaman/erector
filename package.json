@@ -7,9 +7,8 @@
     "codecov": "node_modules/.bin/codecov",
     "compile": "node_modules/.bin/tsc --noEmit -p .",
     "compile+test": "npm run compile && npm test",
-    "coveralls": "cat coverage/lcov.info | node_modules/.bin/coveralls",
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
-    "post-coverage": "npm run codecov && npm run coveralls",
+    "post-coverage": "npm run codecov",
     "publish-docs": "node_modules/.bin/gh-pages --dist docs",
     "test": "node_modules/.bin/jest",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
