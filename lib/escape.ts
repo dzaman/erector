@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const knex = require('knex')({ client: 'pg' });
 
 export class EscapeLiteral {
 
@@ -34,55 +33,14 @@ export class EscapeLiteral {
     return number;
   }
 
-  protected static _convert_timezone(tz: string): number | boolean {
-    if (tz === 'Z') {
-      return 0;
-    }
-    const m = tz.match(/([+\-\s])(\d\d):?(\d\d)?/);
-    if (m) {
-      return (
-        (m[1] == '-' ? -1 : 1) *
-        (parseInt(m[2], 10) + (m[3] ? parseInt(m[3], 10) : 0) / 60) *
-        60
-      );
-    }
-    return false;
-  }
   protected static escape_date(date: Date): string {
-    const timeZone = 'local';
-
-    const dt = new Date(date);
-    let year;
-    let month;
-    let day;
-    let hour;
-    let minute;
-    let second;
-    let millisecond;
-
-    if (timeZone === 'local') {
-      year = dt.getFullYear();
-      month = dt.getMonth() + 1;
-      day = dt.getDate();
-      hour = dt.getHours();
-      minute = dt.getMinutes();
-      second = dt.getSeconds();
-      millisecond = dt.getMilliseconds();
-    } else {
-      const tz = this._convert_timezone(timeZone);
-
-      if (tz !== false && tz !== 0) {
-	dt.setTime((dt.getTime() as number) + (tz as number) * 60000);
-      }
-
-      year = dt.getUTCFullYear();
-      month = dt.getUTCMonth() + 1;
-      day = dt.getUTCDate();
-      hour = dt.getUTCHours();
-      minute = dt.getUTCMinutes();
-      second = dt.getUTCSeconds();
-      millisecond = dt.getUTCMilliseconds();
-    }
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = date.getSeconds();
+    const millisecond = date.getMilliseconds();
 
     // YYYY-MM-DD HH:mm:ss.mmm
     return (
@@ -110,53 +68,61 @@ export class EscapeLiteral {
   }
 
   protected static escape_string(value: string): string {
-    let hasBackslash = false;
+    let has_backslash = false;
     let escaped = "'";
     for (let i = 0; i < value.length; i++) {
       const c = value[i];
 
       if (c === "'") {
-	escaped += c + c;
+        escaped += c + c;
       } else if (c === '\\') {
-	escaped += c + c;
-	hasBackslash = true;
+        escaped += c + c;
+        has_backslash = true;
       } else {
-	escaped += c;
+        escaped += c;
       }
     }
 
     escaped += "'";
 
-    if (hasBackslash === true) {
+    if (has_backslash === true) {
       escaped = 'E' + escaped;
     }
     return escaped;
   };
 
-  public static escape_value(val: any): string {
-    if (val === undefined || val === null) {
+  // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/dialects/postgres/index.js#L51
+  // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/query/string.js#L22
+  public static escape_value(value_or_fn: any): string {
+    let value = typeof value_or_fn === 'function' ? value_or_fn() : value_or_fn;
+
+    if (value === undefined || value === null) {
       return 'NULL';
     }
-    switch (typeof val) {
+
+    switch (typeof value) {
       case 'boolean':
-	return val ? 'true' : 'false';
+        return value ? 'true' : 'false';
       case 'number':
-	return val + '';
+        return value + '';
       case 'object':
-	if (val instanceof Date) {
-	  val = this.escape_date(val);
-	} else if (Array.isArray(val)) {
-	  return this.escape_array(val);
-	} else if (Buffer.isBuffer(val)) {
-	  return this.escape_buffer(val);
-	} else {
-	  return this.escape_object(val);
-	}
+        if (value instanceof Date) {
+          value = this.escape_date(value);
+        } else if (Array.isArray(value)) {
+          return `'${this.escape_array(value)}'`;
+        } else if (Buffer.isBuffer(value)) {
+          return this.escape_buffer(value);
+        } else {
+          return this.escape_object(value);
+        }
     }
-    return this.escape_string(val);
+
+    return this.escape_string(value);
   }
 
 }
+
+type WrappedValue = (...params: unknown[]) => string | number;
 
 export class WrapIdentifier {
   protected static _wrap_identifier(value: string):string {
@@ -190,15 +156,21 @@ export class WrapIdentifier {
 
   // Puts the appropriate wrapper around a value depending on the database
   // engine, unless it's a knex.raw value, in which case it's left alone.
-  public static wrap(value: any): string | number {
+  // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/formatter.js#L174
+  public static wrap(fn_or_value: string | number | WrappedValue): string | number {
+    const value: any = typeof fn_or_value === 'function' ? fn_or_value() : fn_or_value;
+
     switch (typeof value) {
-      // case 'function':
-      //   return this.outputQuery(this.compileCallback(value), true);
-      // case 'object':
-      //   return this.parseObject(value);
+      case 'function':
+        throw Error('already unwrapped value once');
+      case 'object':
+      case 'bigint':
+      case 'symbol':
+      case 'undefined':
+      case 'boolean':
+        throw Error(`${typeof value} identifiers are not yet supported`);
       case 'number':
         return value;
-	// null? undefined? boolean?
       default:
         return this.wrap_string(value + '');
     }
@@ -207,6 +179,51 @@ export class WrapIdentifier {
   protected static wrap_identifier(value: string): string {
     return this._wrap_identifier((value || '').trim());
   }
+}
+
+function contains_undefined(mixed: any): boolean {
+  let arg_contains_undefined = false;
+
+  if (_.isTypedArray(mixed)) return false;
+
+  if (_.isArray(mixed)) {
+    for (let i = 0; i < mixed.length; i++) {
+      if (arg_contains_undefined) break;
+      arg_contains_undefined = contains_undefined(mixed[i]);
+    }
+  } else if (_.isPlainObject(mixed)) {
+    Object.keys(mixed).forEach((key) => {
+      if (!arg_contains_undefined) {
+        arg_contains_undefined = contains_undefined(mixed[key]);
+      }
+    });
+  } else {
+    arg_contains_undefined = _.isUndefined(mixed);
+  }
+
+  return arg_contains_undefined;
+}
+
+function get_undefined_indices(mixed: any): Array<string|number> {
+  const indices = [];
+
+  if (Array.isArray(mixed)) {
+    mixed.forEach((item, index) => {
+      if (contains_undefined(item)) {
+        indices.push(index);
+      }
+    });
+  } else if (_.isPlainObject(mixed)) {
+    Object.keys(mixed).forEach((key) => {
+      if (contains_undefined(mixed[key])) {
+        indices.push(key);
+      }
+    });
+  } else {
+    indices.push(0);
+  }
+
+  return indices;
 }
 
 /**
@@ -226,6 +243,13 @@ export const escape = (statement: string, values: any): string => {
   const expected_bindings = values_array.length;
   let index = 0;
 
+  if (contains_undefined(values_array)) {
+    const undefined_binding_indices = get_undefined_indices(values_array);
+    throw new Error(
+      `Undefined binding(s) detected for keys [${undefined_binding_indices}] when compiling RAW query: ${statement}`
+    );
+  }
+
   const escaped_string = statement.replace(/\\\?|\?{1,3}/g, (match) => {
     // escaped questionmarks don't count
     if (match === '\\?') {
@@ -234,6 +258,10 @@ export const escape = (statement: string, values: any): string => {
 
     let value = values_array[index];
     index += 1;
+
+    if (index > expected_bindings) {
+      return match;
+    }
 
     if (value instanceof QueryPart) {
       value = value.param();

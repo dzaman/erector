@@ -1,7 +1,7 @@
 {
   "name": "erector",
   "version": "0.0.1",
-  "description": "",
+  "description": "SQL Query Builder for Postgres",
   "main": "lib/erector.js",
   "scripts": {
     "codecov": "node_modules/.bin/codecov",
@@ -13,10 +13,12 @@
     "test": "node_modules/.bin/jest",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
-  "author": "Matthew Dzaman <matthew@dzaman.org>",
+  "author": {
+    "name": "Matthew Dzaman",
+    "email": "<matthew@dzaman.org>"
+  },
   "license": "MIT",
   "dependencies": {
-    "knex": "^0.19.4",
     "lodash": "^4.17.15"
   },
   "devDependencies": {
@@ -27,6 +29,7 @@
     "coveralls": "^3.0.6",
     "gh-pages": "^2.1.1",
     "jest": "^24.9.0",
+    "knex": "^0.19.5",
     "ts-jest": "^24.1.0",
     "typedoc": "^0.15.0",
     "typescript": "^3.6.3"
