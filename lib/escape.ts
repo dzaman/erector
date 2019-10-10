@@ -248,10 +248,39 @@ export const escape = (statement: string, value: any): string => {
   }
 }
 
+// https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L149
 export const escape_key_bindings = (statement: string, values: any[]): string => {
-  return statement;
+  const regex = /\\?(::(\w+)::|:(\w+):|:(\w+))/g;
+
+  const sql = raw.sql.replace(regex, function(match, p1, p2, p3) {
+    // the string is escaped
+    if (match !== p1) {
+      return p1;
+    }
+
+    const part = p2 || p3 || p4;
+    const key = match.trim();
+    const is_raw = key[key.length - 1] === ':' && key[key.length - 2] === ':';
+    const is_identifier = !is_raw && key[key.length - 1] === ':';
+    let value = values[part];
+
+    if (value instanceof QueryPart) {
+      value = value.param();
+    }
+
+    if (is_raw) {
+      return `${value}`;
+    }
+
+    if (is_identifier) {
+      return `${WrapIdentifier.wrap(value)}`;
+    }
+
+    return EscapeLiteral.escape_value(value);
+  });
 }
 
+// https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L120
 export const escape_placeholder_bindings = (statement: string, values: any[]): string => {
   const QueryPart = require('./erector').QueryPart;
 
