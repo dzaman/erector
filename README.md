@@ -1,1 +1,1 @@
-[![CircleCI](https://img.shields.io/circleci/build/github/dzaman/erector)](https://circleci.com/gh/dzaman/erector) [![codecov](https://img.shields.io/codecov/c/github/dzaman/erector)](https://codecov.io/gh/dzaman/erector
+[![CircleCI](https://img.shields.io/circleci/build/github/dzaman/erector)](https://circleci.com/gh/dzaman/erector) [![codecov](https://img.shields.io/codecov/c/github/dzaman/erector)](https://codecov.io/gh/dzaman/erector)
