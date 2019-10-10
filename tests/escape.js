@@ -6,6 +6,12 @@ const {
 // } = require('../lib/erector');
 } = require('../lib/escape');
 
+const {
+  Literal,
+  Identifier,
+  Raw,
+} = require('../lib/erector');
+
 const knex = require('knex')({ client: 'pg' });
 
 describe('escape', () => {
@@ -115,6 +121,7 @@ describe('escape', () => {
     test.each([
       // this should probably be an error for knex but it is not
       [undefined, false],
+      // TODO: fix this test
       // this is not an error for knex because it treats this as named parameters and ? is not significant
       // [{ a: undefined }, false],
       [[undefined], true],
@@ -135,6 +142,24 @@ describe('escape', () => {
   });
 });
 
+describe('parameters', () => {
+  test.each([
+    ['\\:foo', ':foo'],
+    ['\\:foo:', ':foo:'],
+    ['\\::foo::', '::foo::'],
+  ])('named parameters can be escaped: %p', (input, expected) => {
+    expect(escape(input, { foo: 'bar' })).toBe(expected);
+  });
+
+  test('QueryParts are unwrapped', () => {
+    expect(escape(':foo :bar: ::baz::', {
+      foo: new Literal('a'),
+      bar: new Identifier('b'),
+      baz: new Raw('c()'),
+    })).toBe(`'a' "b" c()`);
+  });
+});
+
 describe('escape literals', () => {
 
   test.each([
@@ -150,7 +175,7 @@ describe('escape literals', () => {
   test('functions are unwrapped', () => {
     expect(EscapeLiteral.escape_value(() => 'foo')).toBe(`'foo'`);
   });
-  
+
 });
 
 describe('wrap identifier', () => {
