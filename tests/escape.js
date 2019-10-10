@@ -46,13 +46,8 @@ describe('escape', () => {
       expect(escape('the quick brown ?', arg)).toBe(`the quick brown 'f''ox'`);
     });
 
-    test.skip('named literals are supported', () => {
+    test('named literals are supported', () => {
       expect(escape('the quick brown :animal', { animal: 'fox' })).toBe(`the quick brown 'fox'`);
-    });
-
-    // TODO: delete this test
-    test.skip('literals get special treatment in parentheses', () => {
-      expect(escape('the quick (?)', [['brown', 'animal']])).toBe(`the quick ('brown', 'animal')`);
     });
   });
 
@@ -65,8 +60,14 @@ describe('escape', () => {
       expect(escape('the quick brown ??', arg)).toBe('the quick brown "fox"."user"');
     });
 
-    test.skip('named identifiers are supported', () => {
+    test('named identifiers are supported', () => {
       expect(escape('the quick brown :animal:', { animal: 'fox' })).toBe('the quick brown "fox"');
+    });
+  });
+
+  describe('raw', () => {
+    test('named raw identifiers are supported', () => {
+      expect(escape('the quick brown ::animal::', { animal: 'fox()' })).toBe('the quick brown fox()');
     });
   });
 
