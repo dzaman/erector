@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const { QueryPart } = require('../lib/query-part-base');
+const { QueryPart } = require('/lib/query-part-base');
 
 export class EscapeLiteral {
 
