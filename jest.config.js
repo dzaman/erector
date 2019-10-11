@@ -6,6 +6,7 @@ module.exports = {
   // but it screws up line numbers
   // collectCoverage: true,
   verbose: true,
+  coveragePathIgnorePatterns: ['/node_modules/', '/vendor/'],
   testMatch: ['**/tests/**/*.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'

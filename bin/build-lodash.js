@@ -7,7 +7,7 @@ const ORIGINAL_SIZE = 500;
 
 const lodash_calls = Object.keys(
   child_process
-  .execFileSync('ack', ['-oh', '_\\.[A-Za-z]+', 'lib'])
+  .execFileSync('ack', ['-oh', '_\\.[A-Za-z]+', 'lib', 'tests'])
   .toString('utf8')
   .split('\n')
   .filter((call) => !!call)

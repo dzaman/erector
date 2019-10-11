@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 const {
   Identifier,
   Literal,
@@ -263,7 +261,7 @@ describe('erector', () => {
       });
     });
   
-    _.each(['and', 'or'], (operator) => {
+    ['and', 'or'].forEach((operator) => {
       const operator_upper = operator.toUpperCase();
   
       describe(operator, () => {
