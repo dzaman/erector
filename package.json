@@ -10,6 +10,7 @@
     "coverage-post": "node_modules/.bin/codecov",
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
     "docs-publish": "node_modules/.bin/gh-pages --dist docs",
+    "lodash": "bin/build-lodash.js",
     "test": "node_modules/.bin/jest",
     "test-build": "npm test -- -c jest.config.build.js",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
