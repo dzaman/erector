@@ -1,9 +1,6 @@
 const _ = require('lodash');
 
 const {
-  e,
-  erector,
-
   Identifier,
   Literal,
   Raw,
@@ -11,14 +8,19 @@ const {
   ListValues,
   ListLabels,
 
+  Statement,
+} = require('../lib/query-parts');
+
+const {
+  e,
+  erector,
+
   i,
   l,
   raw,
 
   labels,
   values,
-
-  Statement,
 } = require('../lib/erector');
 
 // TODO: define when to use each

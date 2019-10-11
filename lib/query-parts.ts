@@ -1,3 +1,13 @@
+import _ from 'lodash';
+
+import { QueryPart } from './query-part-base';
+import { escape } from './escape';
+
+export abstract class QueryPartWithEscape extends QueryPart {
+
+  static readonly escape = escape; 
+
+}
 
 // TODO: configuration option -> generate strings or Statements
 // TODO: configuration option -> left operand default type is identifier
@@ -8,22 +18,8 @@ interface SingleValueQueryPartConstructor {
   new(value: any): SingleValueQueryPart;
 }
 
-export abstract class QueryPart {
 
-  static readonly escape;
-
-  public abstract placeholder: string;
-
-  public abstract param(): any;
-  public abstract format(): string;
-
-  public toString(): string {
-    return this.format();
-  }
-
-}
-
-export abstract class MultiValueQueryPart extends QueryPart {
+export abstract class MultiValueQueryPart extends QueryPartWithEscape {
 
   public placeholder = '???';
 
@@ -33,7 +29,7 @@ export abstract class MultiValueQueryPart extends QueryPart {
 
 }
 
-export abstract class SingleValueQueryPart extends QueryPart {
+export abstract class SingleValueQueryPart extends QueryPartWithEscape {
 
   public value: any;
 
@@ -76,7 +72,7 @@ export class Raw extends SingleValueQueryPart {
 export abstract class EscapedSingleValueQueryPart extends SingleValueQueryPart {
 
   public format(): string {
-    return (<typeof EscapedSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value).toString();
+    return (<typeof EscapedSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value);
   }
 
 }
@@ -155,7 +151,7 @@ export abstract class List extends MultiValueQueryPart {
       params,
     } = this.content_to_placeholders_and_params(content);
 
-    return (<typeof List>this.constructor).escape(placeholders.join(', '), params).toString();
+    return (<typeof List>this.constructor).escape(placeholders.join(', '), params);
   }
 
 }
@@ -241,17 +237,9 @@ export class Statement extends MultiValueQueryPart {
 
   public format(): string {
     // this actually needs to handle ???
-    return (<typeof Statement>this.constructor).escape(this.text, this.params).toString();
+    return (<typeof Statement>this.constructor).escape(this.text, this.params);
   }
 
 }
 
 
-// // NOTE: exp is mutated
-const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
-  while (typeof exp === 'function') {
-    exp = exp();
-  }
-
-  return exp;
-}

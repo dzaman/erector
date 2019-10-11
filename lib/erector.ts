@@ -1,7 +1,28 @@
 import _ from 'lodash';
 import assert from 'assert';
-import { escape } from '/escape';
 
+import { QueryPart } from './query-part-base';
+
+import {
+  Identifier,
+  List,
+  ListLabels,
+  ListValues,
+  Literal,
+  Raw,
+  SingleValueQueryPart,
+  Statement,
+  StatementParam,
+} from './query-parts';
+
+// // NOTE: exp is mutated
+const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
+  while (typeof exp === 'function') {
+    exp = exp();
+  }
+
+  return exp;
+}
 
 /**
  * @param strings   Comment for `strings`

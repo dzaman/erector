@@ -1,5 +1,7 @@
 const _ = require('lodash');
 
+const { QueryPart } = require('../lib/query-part-base');
+
 export class EscapeLiteral {
 
   // pg version
@@ -231,8 +233,6 @@ function get_undefined_indices(mixed: any): Array<string|number> {
  * @param args      Single value, array of positional values, or object of named values
  */
 export const escape = (statement: string, value: any): string => {
-  const QueryPart = require('./erector').QueryPart;
-
   if (_.isPlainObject(value)) {
     return escape_key_bindings(statement, value);
   } else {
@@ -250,8 +250,6 @@ export const escape = (statement: string, value: any): string => {
 
 // https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L149
 export const escape_key_bindings = (statement: string, values: { [index: string]: any }): string => {
-  const QueryPart = require('./erector').QueryPart;
-
   const regex = /\\?(::(\w+)::|:(\w+):|:(\w+))/g;
 
   const escaped_string = statement.replace(regex, (match: string, p1: string, p2: string, p3: string, p4: string) => {
@@ -286,8 +284,6 @@ export const escape_key_bindings = (statement: string, values: { [index: string]
 
 // https://github.com/knex/knex/blob/4ade98980e489e18f18e8fdabf86cc275501c04c/lib/raw.js#L120
 export const escape_placeholder_bindings = (statement: string, values: any[]): string => {
-  const QueryPart = require('./erector').QueryPart;
-
   const expected_bindings = values.length;
   let index = 0;
 
