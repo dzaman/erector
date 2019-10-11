@@ -22,7 +22,7 @@ commands:
 
   build-and-test:
     description: "Installs, builds, and tests"
-    step:
+    steps:
       - install
       # build and test
       - run: npm run build+test
