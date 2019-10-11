@@ -3,18 +3,9 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
-jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:lts
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-    working_directory: ~/erector
+commands:
+  install:
+    description: "Checks out and installs"
 
     steps:
       - checkout
@@ -33,11 +24,114 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: npm run test+coverage
+  build-and-test:
+    description: "Installs, builds, and tests"
+    step:
+      - install
+      # build and test
+      - run: npm run build+test
+
+jobs:
+  test-and-coverage:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:lts
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/mongo:3.4.4
+
+    # setting this in every job for consistency is annoying
+    # default is 'project'
+    # working_directory: ~/erector
+
+    steps:
+      - install
 
       - store_artifacts:
           path: coverage
 
       - run: npm run coverage-post
 
+  test-node-6:
+    docker:
+      - image: circleci/node:6
+    steps:
+      - build-and-test
+
+  test-node-7:
+    docker:
+      - image: circleci/node:7
+    steps:
+      - build-and-test
+
+  test-node-8:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - build-and-test
+
+  test-node-9:
+    docker:
+      - image: circleci/node:9
+    steps:
+      - build-and-test
+
+  test-node-10:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - build-and-test
+
+  test-node-11:
+    docker:
+      - image: circleci/node:11
+    steps:
+      - build-and-test
+
+  test-node-12:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - build-and-test
+
+workflows: 
+  version: 2
+  # can set up nightly jobs
+  build-and-test:
+    jobs:
+      - test-and-coverage
+
+      # could conditionally test 6..12 based on PR attributes (label, dest branch) with "when:"
+
+      - test-node-6
+        requires:
+          - test-and-coverage
+
+      - test-node-7
+        requires:
+          - test-and-coverage
+
+      - test-node-8
+        requires:
+          - test-and-coverage
+
+      - test-node-9
+        requires:
+          - test-and-coverage
+
+      - test-node-10
+        requires:
+          - test-and-coverage
+
+      - test-node-11
+        requires:
+          - test-and-coverage
+
+      - test-node-12
+        requires:
+          - test-and-coverage
+
+      # create tag/release
+      # publish to NPM
