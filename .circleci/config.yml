@@ -39,5 +39,5 @@ jobs:
       - store_artifacts:
           path: coverage
 
-      - run: npm run post-coverage
+      - run: npm run coverage-post
 
