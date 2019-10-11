@@ -14,6 +14,10 @@
     "test-build": "npm test -- -c jest.config.build.js",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
+  "jest-junit": {
+    "outputDirectory": "test-results/jest",
+    "outputName": "junit.xml"
+  },
   "author": {
     "name": "Matthew Dzaman",
     "email": "<matthew@dzaman.org>"

@@ -15,7 +15,8 @@ module.exports = {
   moduleNameMapper: {
     '^\/lib/(.*)': '$1',
   },
-  reporters: ['default', 'jest-junit'],
+  // this is set on the command line
+  // reporters: ['default', 'jest-junit'],
   // testEnvironment: './test-environment.js',
   // globalSetup: './global-setup.js',
 };

@@ -39,10 +39,12 @@ commands:
     steps:
       - install
 
-      - run: npm run build+test -- --ci --runInBand
+      - run:
+          name: Build and run tests
+          command: npm run build+test -- --ci --runInBand --reporters=default --reporters=jest-junit
 
       - store_test_results:
-          path: junit.xml
+          path: test-results
 
 jobs:
   test-and-coverage:
@@ -57,15 +59,19 @@ jobs:
     steps:
       - install
 
-      - run: npm run test+coverage -- --ci --runInBand
+      - run: 
+          name: Run tests and collect coverage
+          command: npm run test+coverage -- --ci --runInBand --reporters=default --reporters=jest-junit
 
       - store_test_results:
-          path: junit.xml
+          path: test-results
 
       - store_artifacts:
           path: coverage
 
-      - run: npm run coverage-post
+      - run: 
+          name: Report coverage stats
+          command: npm run coverage-post
 
   test-node-6:
     docker:

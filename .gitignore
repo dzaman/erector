@@ -3,4 +3,4 @@ build/
 coverage/
 docs/
 node_modules/
-junit.xml
+test-results/
