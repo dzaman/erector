@@ -1,3 +1,17 @@
+#
+# Note on --runInBand: 
+#
+# When running Jest tests, please use the --runInBand flag. Without this flag, Jest will try to
+# allocate the CPU resources of the entire virtual machine in which your job is running. Using
+# --runInBand will force Jest to use only the virtualized build environment within the virtual
+# machine
+#
+# Note on --ci
+#
+# When this option is provided, Jest will assume it is running in a CI environment. This changes
+# the behavior when a new snapshot is encountered. Instead of the regular behavior of storing a new
+# snapshot automatically, it will fail the test and require Jest to be run with --updateSnapshot.
+#
 version: 2.1
 commands:
   install:
@@ -24,8 +38,11 @@ commands:
     description: "Installs, builds, and tests"
     steps:
       - install
-      # build and test
-      - run: npm run build+test
+
+      - run: npm run build+test -- --ci --runInBand
+
+      - store_test_results:
+          path: junit.xml
 
 jobs:
   test-and-coverage:
@@ -40,7 +57,10 @@ jobs:
     steps:
       - install
 
-      - run: npm run test+coverage
+      - run: npm run test+coverage -- --ci --runInBand
+
+      - store_test_results:
+          path: junit.xml
 
       - store_artifacts:
           path: coverage
