@@ -61,10 +61,6 @@ jobs:
           name: Build
           command: npm run build
 
-      #- persist_to_workspace:
-      #    root: build
-      #    paths:
-      #      - ./*
       - persist_to_workspace:
           root: ./
           paths:
@@ -145,11 +141,10 @@ workflows:
     jobs:
       - test-and-coverage
 
-      - build-for-dist
-      #- build-for-dist:
-      #    filters:
-      #      branches:
-      #        only: master
+      - build-for-dist:
+          filters:
+            branches:
+              only: master
 
       # could conditionally test 6..12 based on PR attrs (label, dest branch) w/ "when:" or "filters"
 
