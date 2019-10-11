@@ -13,7 +13,9 @@
 # snapshot automatically, it will fail the test and require Jest to be run with --updateSnapshot.
 #
 version: 2.1
-working_directory: erector
+# this doesn't seem to have an effect and setting this in every job for consistency is annoying
+# default is 'project'
+# working_directory: erector
 commands:
   install:
     description: "Checks out and installs"
@@ -70,10 +72,6 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:lts
-
-    # setting this in every job for consistency is annoying
-    # default is 'project'
-    # working_directory: ~/erector
 
     steps:
       - install
