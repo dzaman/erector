@@ -13,6 +13,7 @@
 # snapshot automatically, it will fail the test and require Jest to be run with --updateSnapshot.
 #
 version: 2.1
+working_directory: erector
 commands:
   install:
     description: "Checks out and installs"
@@ -39,7 +40,7 @@ commands:
     steps:
 
       - attach_workspace:
-          at: build
+          at: ./
 
       - run:
           name: Build and run tests
@@ -60,8 +61,12 @@ jobs:
           name: Build
           command: npm run build
 
+      #- persist_to_workspace:
+      #    root: build
+      #    paths:
+      #      - ./*
       - persist_to_workspace:
-          root: build
+          root: ./
           paths:
             - ./*
 
