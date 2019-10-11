@@ -12,6 +12,7 @@ module.exports = {
   },
   moduleFileExtensions: [ 'js', 'json', 'jsx', 'node', 'ts', 'tsx' ],
   rootDir: './lib',
+  coverageDirectory: '../coverage',
   roots: ['<rootDir>', '<rootDir>/../tests'],
   moduleNameMapper: {
     '^\/lib/(.*)': '<rootDir>/$1',
