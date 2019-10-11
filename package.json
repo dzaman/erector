@@ -4,13 +4,14 @@
   "description": "SQL Query Builder for Postgres",
   "main": "lib/erector.js",
   "scripts": {
-    "codecov": "node_modules/.bin/codecov",
-    "compile": "node_modules/.bin/tsc --noEmit -p .",
-    "compile+test": "npm run compile && npm test",
+    "build": "node_modules/.bin/tsc -p .",
+    "build+test": "npm run build -- --noEmit && npm run test-build",
+    "coverage": "node_modules/.bin/codecov",
+    "coverage-post": "npm run codecov",
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
-    "post-coverage": "npm run codecov",
-    "publish-docs": "node_modules/.bin/gh-pages --dist docs",
+    "docs-publish": "node_modules/.bin/gh-pages --dist docs",
     "test": "node_modules/.bin/jest",
+    "test-build": "npm test -- -c jest.config.build.js",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
   "author": {

@@ -6,11 +6,16 @@ module.exports = {
   // but it screws up line numbers
   // collectCoverage: true,
   verbose: true,
-  testMatch: ['**/tests/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[tj]s?(x)'],
+  testMatch: ['**/tests/**/*.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
   moduleFileExtensions: [ 'js', 'json', 'jsx', 'node', 'ts', 'tsx' ],
+  rootDir: './lib',
+  roots: ['<rootDir>', '<rootDir>/../tests'],
+  moduleNameMapper: {
+    '^\/lib/(.*)': '<rootDir>/$1',
+  },
   // testEnvironment: './test-environment.js',
   // globalSetup: './global-setup.js',
 };
