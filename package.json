@@ -5,7 +5,8 @@
   "main": "lib/erector.js",
   "scripts": {
     "build": "node_modules/.bin/tsc -p .",
-    "build+test": "npm run build -- --noEmit && npm run test-build",
+    "build+test": "npm run build && npm run test-build",
+    "build+test+coverage": "npm run build+test -- -- --collect-coverage",
     "coverage": "node_modules/.bin/codecov",
     "coverage-post": "npm run codecov",
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
