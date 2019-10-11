@@ -14,6 +14,10 @@
     "test-build": "npm test -- -c jest.config.build.js",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
   },
+  "jest-junit": {
+    "outputDirectory": "test-results/jest",
+    "outputName": "junit.xml"
+  },
   "author": {
     "name": "Matthew Dzaman",
     "email": "<matthew@dzaman.org>"
@@ -29,6 +33,7 @@
     "codecov": "^3.6.1",
     "gh-pages": "^2.1.1",
     "jest": "^24.9.0",
+    "jest-junit": "^8.0.0",
     "knex": "^0.19.5",
     "ts-jest": "^24.1.0",
     "typedoc": "^0.15.0",

@@ -1,20 +1,22 @@
-# Javascript Node CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+# Note on --runInBand: 
 #
-version: 2
-jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:lts
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-    working_directory: ~/erector
+# When running Jest tests, please use the --runInBand flag. Without this flag, Jest will try to
+# allocate the CPU resources of the entire virtual machine in which your job is running. Using
+# --runInBand will force Jest to use only the virtualized build environment within the virtual
+# machine
+#
+# Note on --ci
+#
+# When this option is provided, Jest will assume it is running in a CI environment. This changes
+# the behavior when a new snapshot is encountered. Instead of the regular behavior of storing a new
+# snapshot automatically, it will fail the test and require Jest to be run with --updateSnapshot.
+#
+version: 2.1
+working_directory: erector
+commands:
+  install:
+    description: "Checks out and installs"
 
     steps:
       - checkout
@@ -33,11 +35,147 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: npm run test+coverage
+  test-build:
+    description: "Tests pre built dist"
+    steps:
+
+      - attach_workspace:
+          at: ./
+
+      - run:
+          name: Build and run tests
+          command: npm run test-build -- --ci --runInBand --reporters=default --reporters=jest-junit
+
+      - store_test_results:
+          path: test-results
+
+jobs:
+  build-for-dist:
+    docker:
+      - image: circleci/node:lts
+
+    steps:
+      - install
+
+      - run:
+          name: Build
+          command: npm run build
+
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - ./*
+
+  test-and-coverage:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:lts
+
+    # setting this in every job for consistency is annoying
+    # default is 'project'
+    # working_directory: ~/erector
+
+    steps:
+      - install
+
+      - run: 
+          name: Run tests and collect coverage
+          command: npm run test+coverage -- --ci --runInBand --reporters=default --reporters=jest-junit
+
+      - store_test_results:
+          path: test-results
 
       - store_artifacts:
           path: coverage
 
-      - run: npm run coverage-post
+      - run: 
+          name: Report coverage stats
+          command: npm run coverage-post
 
+  test-node-6:
+    docker:
+      - image: circleci/node:6
+    steps:
+      - test-build
+
+  test-node-7:
+    docker:
+      - image: circleci/node:7
+    steps:
+      - test-build
+
+  test-node-8:
+    docker:
+      - image: circleci/node:8
+    steps:
+      - test-build
+
+  test-node-9:
+    docker:
+      - image: circleci/node:9
+    steps:
+      - test-build
+
+  test-node-10:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - test-build
+
+  test-node-11:
+    docker:
+      - image: circleci/node:11
+    steps:
+      - test-build
+
+  test-node-12:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - test-build
+
+workflows: 
+  version: 2
+  # can set up nightly jobs
+  build-and-test:
+    jobs:
+      - test-and-coverage
+
+      - build-for-dist:
+          filters:
+            branches:
+              only: master
+
+      # could conditionally test 6..12 based on PR attrs (label, dest branch) w/ "when:" or "filters"
+
+      # knex tests need to be skipped to run 6 & 7
+      #- test-node-6:
+      #    requires:
+      #      - test-and-coverage
+
+      #- test-node-7:
+      #    requires:
+      #      - test-and-coverage
+
+      - test-node-8:
+          requires:
+            - build-for-dist
+
+      - test-node-9:
+          requires:
+            - build-for-dist
+
+      - test-node-10:
+          requires:
+            - build-for-dist
+
+      - test-node-11:
+          requires:
+            - build-for-dist
+
+      - test-node-12:
+          requires:
+            - build-for-dist
+
+      # create tag/release
+      # publish to NPM
