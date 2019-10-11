@@ -9,7 +9,7 @@ const {
   ListLabels,
 
   Statement,
-} = require('../lib/query-parts');
+} = require('/lib/query-parts');
 
 const {
   e,
@@ -21,7 +21,7 @@ const {
 
   labels,
   values,
-} = require('../lib/erector');
+} = require('/lib/erector');
 
 // TODO: define when to use each
 
