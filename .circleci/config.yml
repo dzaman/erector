@@ -34,19 +34,37 @@ commands:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-  build-and-test:
-    description: "Installs, builds, and tests"
+  test-build:
+    description: "Tests pre built dist"
     steps:
-      - install
+
+      - attach_workspace:
+          at: build
 
       - run:
           name: Build and run tests
-          command: npm run build+test -- --ci --runInBand --reporters=default --reporters=jest-junit
+          command: npm run test-build -- --ci --runInBand --reporters=default --reporters=jest-junit
 
       - store_test_results:
           path: test-results
 
 jobs:
+  build-for-dist:
+    docker:
+      - image: circleci/node:lts
+
+    steps:
+      - install
+
+      - run:
+          name: Build
+          command: npm run build
+
+      - persist_to_workspace:
+          root: build
+          paths:
+            - ./*
+
   test-and-coverage:
     docker:
       # specify the version you desire here
@@ -77,43 +95,43 @@ jobs:
     docker:
       - image: circleci/node:6
     steps:
-      - build-and-test
+      - test-build
 
   test-node-7:
     docker:
       - image: circleci/node:7
     steps:
-      - build-and-test
+      - test-build
 
   test-node-8:
     docker:
       - image: circleci/node:8
     steps:
-      - build-and-test
+      - test-build
 
   test-node-9:
     docker:
       - image: circleci/node:9
     steps:
-      - build-and-test
+      - test-build
 
   test-node-10:
     docker:
       - image: circleci/node:10
     steps:
-      - build-and-test
+      - test-build
 
   test-node-11:
     docker:
       - image: circleci/node:11
     steps:
-      - build-and-test
+      - test-build
 
   test-node-12:
     docker:
       - image: circleci/node:12
     steps:
-      - build-and-test
+      - test-build
 
 workflows: 
   version: 2
@@ -121,6 +139,11 @@ workflows:
   build-and-test:
     jobs:
       - test-and-coverage
+
+      - build-for-dist:
+          filters:
+            branches:
+              only: master
 
       # could conditionally test 6..12 based on PR attrs (label, dest branch) w/ "when:" or "filters"
 
@@ -135,23 +158,23 @@ workflows:
 
       - test-node-8:
           requires:
-            - test-and-coverage
+            - build-for-dist
 
       - test-node-9:
           requires:
-            - test-and-coverage
+            - build-for-dist
 
       - test-node-10:
           requires:
-            - test-and-coverage
+            - build-for-dist
 
       - test-node-11:
           requires:
-            - test-and-coverage
+            - build-for-dist
 
       - test-node-12:
           requires:
-            - test-and-coverage
+            - build-for-dist
 
       # create tag/release
       # publish to NPM
