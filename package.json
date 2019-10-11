@@ -10,6 +10,7 @@
     "coverage-post": "node_modules/.bin/codecov",
     "docs": "node_modules/.bin/typedoc --out docs --module commonjs lib",
     "docs-publish": "node_modules/.bin/gh-pages --dist docs",
+    "lodash": "bin/build-lodash.js",
     "test": "node_modules/.bin/jest",
     "test-build": "npm test -- -c jest.config.build.js",
     "test+coverage": "node_modules/.bin/jest --collect-coverage"
@@ -23,9 +24,7 @@
     "email": "<matthew@dzaman.org>"
   },
   "license": "MIT",
-  "dependencies": {
-    "lodash": "^4.17.15"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^24.0.18",
     "@types/lodash": "^4.14.141",
@@ -35,6 +34,7 @@
     "jest": "^24.9.0",
     "jest-junit": "^8.0.0",
     "knex": "^0.19.5",
+    "lodash-cli": "^4.17.5",
     "ts-jest": "^24.1.0",
     "typedoc": "^0.15.0",
     "typescript": "^3.6.3"
