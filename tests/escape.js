@@ -3,14 +3,14 @@ const {
   EscapeLiteral,
   WrapIdentifier, 
 // should this be exported from the main module?
-// } = require('../lib/erector');
-} = require('../lib/escape');
+// } = require('/lib/erector');
+} = require('/lib/escape');
 
 const {
   Literal,
   Identifier,
   Raw,
-} = require('../lib/query-parts');
+} = require('/lib/query-parts');
 
 const knex = require('knex')({ client: 'pg' });
 
