@@ -101,37 +101,37 @@ workflows:
   # can set up nightly jobs
   build-and-test:
     jobs:
-      - test-and-coverage
+      - test-and-coverage 
 
-      # could conditionally test 6..12 based on PR attributes (label, dest branch) with "when:"
+        # could conditionally test 6..12 based on PR attrs (label, dest branch) w/ "when:" or "filters"
 
-      - test-node-6
-        requires:
-          - test-and-coverage
+      # - test-node-6:
+      #   requires:
+      #     - test-and-coverage
 
-      - test-node-7
-        requires:
-          - test-and-coverage
+      # - test-node-7:
+      #   requires:
+      #     - test-and-coverage
 
-      - test-node-8
-        requires:
-          - test-and-coverage
+      - test-node-8:
+          requires:
+            - test-and-coverage
 
-      - test-node-9
-        requires:
-          - test-and-coverage
+      #- test-node-9:
+      #  requires:
+      #    - test-and-coverage
 
-      - test-node-10
-        requires:
-          - test-and-coverage
+      #- test-node-10:
+      #  requires:
+      #    - test-and-coverage
 
-      - test-node-11
-        requires:
-          - test-and-coverage
+      #- test-node-11:
+      #  requires:
+      #    - test-and-coverage
 
-      - test-node-12
-        requires:
-          - test-and-coverage
+      #- test-node-12:
+      #  requires:
+      #    - test-and-coverage
 
       # create tag/release
       # publish to NPM
