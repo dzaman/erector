@@ -10,7 +10,7 @@ const {
   Literal,
   Identifier,
   Raw,
-} = require('../lib/erector');
+} = require('../lib/query-parts');
 
 const knex = require('knex')({ client: 'pg' });
 
