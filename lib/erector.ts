@@ -27,10 +27,7 @@ const _resolve_function_recursively = (exp: StatementParam): StatementParam => {
 /**
  * @param strings   Comment for `strings`
  */
-export const erector = (_strings: string[], ..._exps: any[]) => {
-  const strings: string[] = _.clone(_strings);
-  const exps: any[] = _.clone(_exps);
-
+export const erector = (strings: string[], ...exps: any[]) => {
   // return _generate_statement(
   //   strings,
   //   _set_list_sources(
