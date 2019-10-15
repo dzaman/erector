@@ -287,20 +287,42 @@ export class Erector {
   }
 }
 
-export const erector: any = Erector.template;
+interface IErector {
+  (a: string): number;
+  foo: string;
+  bar: number;
+}
 
-export const raw = Erector.raw = SingleValueQueryPart.make_template_factory(Raw).bind(Erector);
-export const i = Erector.identifier = SingleValueQueryPart.make_template_factory(Identifier).bind(Erector);
-export const l = Erector.literal = SingleValueQueryPart.make_template_factory(Literal).bind(Erector);
+export const erector: IErector = Object.assign(
+  Erector.template,
+  {
+    raw: SingleValueQueryPart.make_template_factory(Raw),
+    identifier: SingleValueQueryPart.make_template_factory(Identifier),
+    literal: SingleValueQueryPart.make_template_factory(Literal),
 
-export const and = erector.and = Erector.and.bind(Erector);
-export const or = erector.or = Erector.or.bind(Erector);
+    and: Erector.and.bind(Erector),
+    or: Erector.or.bind(Erector),
 
-export const cmp = erector.cmp = Erector.cmp.bind(Erector);
-export const cmp_subquery = erector.cmp_subquery = Erector.cmp_subquery.bind(Erector);
+    cmp: Erector.cmp.bind(Erector),
+    cmp_subquery: Erector.cmp_subquery.bind(Erector),
 
-export const setdefined = erector.setdefined = Erector.setdefined.bind(Erector);
-export const set = erector.set = Erector.set.bind(Erector);
+    setdefined: Erector.setdefined.bind(Erector),
+    set: Erector.set.bind(Erector),
 
-export const labels = erector.labels = Erector.labels.bind(Erector);
-export const values = erector.values = Erector.values.bind(Erector);
+    labels: Erector.labels.bind(Erector),
+    values: Erector.values.bind(Erector),
+  }
+);
+
+export const and = erector.and;
+export const or = erector.or;
+
+export const cmp = erector.cmp;
+export const cmp_subquery = erector.cmp_subquery;
+
+export const setdefined = erector.setdefined;
+export const set = erector.set;
+
+export const labels = erector.labels;
+export const values = erector.values;
+
