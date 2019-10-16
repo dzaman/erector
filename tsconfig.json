@@ -1,4 +1,7 @@
 {
+  "include": [
+    "lib/**/*"
+  ],
   "compilerOptions": {
     /* Basic Options */
     // "incremental": true,                   /* Enable incremental compilation */
