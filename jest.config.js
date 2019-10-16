@@ -7,6 +7,7 @@ module.exports = {
   // collectCoverage: true,
   verbose: true,
   coveragePathIgnorePatterns: ['/node_modules/', '/vendor/'],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/fixtures/'],
   testMatch: ['**/tests/**/*.[jt]s?(x)'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'

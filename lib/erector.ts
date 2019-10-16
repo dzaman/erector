@@ -119,7 +119,7 @@ export interface SetOptions {
 
 export namespace erector {
   export const raw = SingleValueQueryPart.make_template_factory(Raw);
-  export const identifier = SingleValueQueryPart.make_template_factory(Identifier);
+  export const identifier: Function = SingleValueQueryPart.make_template_factory(Identifier);
   export const i = identifier;
   export const literal = SingleValueQueryPart.make_template_factory(Literal);
   export const l = literal;
@@ -298,7 +298,7 @@ export namespace erector {
 
 export const raw = erector.raw;
 export const i = erector.i;
-export const identifier = erector.identifier;
+export const identifier: Function = erector.identifier;
 export const l = erector.l;
 export const literal = erector.literal;
 
