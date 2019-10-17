@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`erector typescript compilation of consumer 1`] = `
+"tests/fixtures/erector-consumer.ts(23,16): error TS2339: Property 'does_not_exist' does not exist on type 'typeof import(\\"/Users/matt/dev/erector/lib/erector\\")'.
+tests/fixtures/erector-consumer.ts(41,24): error TS2339: Property 'does_not_exist' does not exist on type 'typeof erector'.
+"
+`;

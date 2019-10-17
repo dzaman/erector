@@ -27,9 +27,13 @@ const erector_module = require('/lib/erector');
 const child_process = require('child_process');
 
 describe('erector', () => {
-  test.only('typescript compilation of consumer', () => {
-    const result = child_process.execFileSync('tsc', ['./tests/fixtures/erector-consumer.ts', '--noEmit']);
-    console.log('result', result);
+  test('typescript compilation of consumer', () => {
+    const result = child_process.spawnSync('node_modules/.bin/tsc', [
+      './tests/fixtures/erector-consumer.ts',
+      '--noEmit',
+      '--esModuleInterop',
+    ]);
+    expect(result.stdout.toString()).toMatchSnapshot();
   });
 
   test('erector is a function', () => {
