@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 
+import { isString } from './util';
+
 export abstract class QueryPartWithEscape extends QueryPart {
 
   static readonly escape = escape; 
@@ -102,7 +104,7 @@ export abstract class List extends MultiValueQueryPart {
   constructor(...args: any[]) {
     super();
 
-    this.name = _.isString(args[0]) ? args[0] : '_';
+    this.name = isString(args[0]) ? args[0] : '_';
 
     for (let i = 0; i < args.length; i++) {
       if (_.isArray(args[i]) || _.isObject(args[i])) {
