@@ -2,6 +2,10 @@ const _ = require('../vendor/lodash.custom.js');
 
 const { QueryPart } = require('./query-part-base');
 
+const {
+  isTypedArray,
+} = require('./util');
+
 export class EscapeLiteral {
 
   // pg version
@@ -186,9 +190,9 @@ export class WrapIdentifier {
 function contains_undefined(mixed: any): boolean {
   let arg_contains_undefined = false;
 
-  if (_.isTypedArray(mixed)) return false;
+  if (isTypedArray(mixed)) return false;
 
-  if (_.isArray(mixed)) {
+  if (Array.isArray(mixed)) {
     for (let i = 0; i < mixed.length; i++) {
       if (arg_contains_undefined) break;
       arg_contains_undefined = contains_undefined(mixed[i]);
@@ -200,7 +204,7 @@ function contains_undefined(mixed: any): boolean {
       }
     });
   } else {
-    arg_contains_undefined = _.isUndefined(mixed);
+    arg_contains_undefined = mixed === undefined;
   }
 
   return arg_contains_undefined;
@@ -238,7 +242,7 @@ export const escape = (statement: string, value: any): string => {
   } else {
     let values_array: any[] = [];
 
-    if (_.isArray(value)) {
+    if (Array.isArray(value)) {
       values_array = value;
     } else if (value) {
       values_array = [value];

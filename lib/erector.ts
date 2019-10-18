@@ -4,6 +4,11 @@ import assert from 'assert';
 import { QueryPart } from './query-part-base';
 
 import {
+  isObject,
+  sort,
+} from './util';
+
+import {
   Identifier,
   List,
   ListLabels,
@@ -69,8 +74,9 @@ export class Erector {
     }
 
     // make sure lists are defined
-    _.each(list_references, (lists: List[], key: string) => {
-      _.each(lists, (list: List) => {
+    Object.keys(list_references).forEach((key: string) => {
+      const lists: List[] = list_references[key];
+      lists.forEach((list: List) => {
         if (key in list_sources) {
           list.set_source(list_sources[key]);
         } else {
@@ -127,11 +133,11 @@ export class Erector {
     const default_operator = args.length === 1;
     const operator = default_operator ? 'IN' : args[0];
     const b_input = default_operator ? args[0] : args[1];
-    const b_array = _.isArray(b_input) ? b_input : [b_input];
+    const b_array = Array.isArray(b_input) ? b_input : [b_input];
 
     // TODO: are these checks sufficient?
     // TODO: b_array is now guaranteed to be an array
-    if (_.isUndefined(b_array) || _.isArray(b_array) && _.isEmpty(b_array)) {
+    if (b_array === undefined || Array.isArray(b_array) && b_array.length === 0) {
       return '';
     } else {
       const text_parts: string[] = [];
@@ -149,7 +155,7 @@ export class Erector {
 
       const b_parts: string[] = [];
 
-      _.each(b_array, (b_element: any) => {
+      b_array.forEach((b_element: any) => {
         if (b_element instanceof QueryPart) {
           b_parts.push(b_element.placeholder);
           params.push(b_element.param());
@@ -175,7 +181,7 @@ export class Erector {
     const operator = default_operator ? '=' : args[0];
     const b = default_operator ? args[0] : args[1];
 
-    if (_.isUndefined(b)) {
+    if (b === undefined) {
       // return an empty string because it's better for this to be excludeable in a template string
       return '';
     } else {
@@ -220,14 +226,14 @@ export class Erector {
 
   // lol 😂
   public static set(obj: { [key: string]: any }, options: SetOptions = {}): Statement | string { 
-    assert(_.isObject(obj), 'first parameter to set must be an object');
+    assert(isObject(obj), 'first parameter to set must be an object');
 
-    const keys = _.sortBy(_.keys(obj));
+    const keys = sort(Object.keys(obj));
 
     const text_parts: string[] = [];
     const params: any[] = [];
 
-    _.each(keys, (key: any) => {
+    keys.forEach((key: any) => {
       const value = (<any>obj[key]);
 
       params.push(key);
@@ -254,8 +260,10 @@ export class Erector {
     }
   }
 
-  public static setdefined(obj: object, options: SetOptions = {}): Statement | string {
-    const defined_object = _.reduce(obj, (acc: { [key: string]: any[] }, value: any, key: string) => {
+  public static setdefined(obj: { [index:string]: any }, options: SetOptions = {}): Statement | string {
+    const defined_object = Object.keys(obj).reduce((acc: { [key: string]: any[] }, key: string) => {
+      const value = obj[key];
+
       if (value !== undefined) {
         acc[key] = value;
       }
