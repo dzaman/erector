@@ -3,7 +3,11 @@ import _ from 'lodash';
 import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 
-import { sort, isString } from './util';
+import {
+  isObject,
+  isString,
+  sort,
+} from './util';
 
 export abstract class QueryPartWithEscape extends QueryPart {
 
@@ -107,7 +111,7 @@ export abstract class List extends MultiValueQueryPart {
     this.name = isString(args[0]) ? args[0] : '_';
 
     for (let i = 0; i < args.length; i++) {
-      if (_.isArray(args[i]) || _.isObject(args[i])) {
+      if (Array.isArray(args[i]) || isObject(args[i])) {
         this.content = args[i];
       }
     }
@@ -170,7 +174,7 @@ export class ListLabels extends List {
     const placeholders: string[] = [];
     const params: any[] = [];
 
-    const labels = _.isArray(content) ? content : sort(Object.keys(content));
+    const labels = Array.isArray(content) ? content : sort(Object.keys(content));
 
     _.each(labels, (label: any) => {
       if (label instanceof QueryPart) {
@@ -199,7 +203,7 @@ export class ListValues extends List {
     const placeholders: string[] = [];
     const params: any[] = [];
 
-    const values = _.isArray(content) ? content : sort(Object.keys(content)).map((key: any) => (content as any)[key]);
+    const values = Array.isArray(content) ? content : sort(Object.keys(content)).map((key: any) => (content as any)[key]);
 
     _.each(values, (value: any) => {
       if (value instanceof QueryPart) {

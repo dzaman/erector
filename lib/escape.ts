@@ -2,7 +2,9 @@ const _ = require('../vendor/lodash.custom.js');
 
 const { QueryPart } = require('./query-part-base');
 
-const { isTypedArray } = require('./util');
+const {
+  isTypedArray,
+} = require('./util');
 
 export class EscapeLiteral {
 
@@ -190,7 +192,7 @@ function contains_undefined(mixed: any): boolean {
 
   if (isTypedArray(mixed)) return false;
 
-  if (_.isArray(mixed)) {
+  if (Array.isArray(mixed)) {
     for (let i = 0; i < mixed.length; i++) {
       if (arg_contains_undefined) break;
       arg_contains_undefined = contains_undefined(mixed[i]);
@@ -240,7 +242,7 @@ export const escape = (statement: string, value: any): string => {
   } else {
     let values_array: any[] = [];
 
-    if (_.isArray(value)) {
+    if (Array.isArray(value)) {
       values_array = value;
     } else if (value) {
       values_array = [value];

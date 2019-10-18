@@ -132,11 +132,11 @@ export class Erector {
     const default_operator = args.length === 1;
     const operator = default_operator ? 'IN' : args[0];
     const b_input = default_operator ? args[0] : args[1];
-    const b_array = _.isArray(b_input) ? b_input : [b_input];
+    const b_array = Array.isArray(b_input) ? b_input : [b_input];
 
     // TODO: are these checks sufficient?
     // TODO: b_array is now guaranteed to be an array
-    if (b_array === undefined || _.isArray(b_array) && b_array.length === 0) {
+    if (b_array === undefined || Array.isArray(b_array) && b_array.length === 0) {
       return '';
     } else {
       const text_parts: string[] = [];
