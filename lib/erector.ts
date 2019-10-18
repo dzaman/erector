@@ -133,7 +133,7 @@ export class Erector {
 
     // TODO: are these checks sufficient?
     // TODO: b_array is now guaranteed to be an array
-    if (_.isUndefined(b_array) || _.isArray(b_array) && _.isEmpty(b_array)) {
+    if (b_array === undefined || _.isArray(b_array) && _.isEmpty(b_array)) {
       return '';
     } else {
       const text_parts: string[] = [];
@@ -177,7 +177,7 @@ export class Erector {
     const operator = default_operator ? '=' : args[0];
     const b = default_operator ? args[0] : args[1];
 
-    if (_.isUndefined(b)) {
+    if (b === undefined) {
       // return an empty string because it's better for this to be excludeable in a template string
       return '';
     } else {

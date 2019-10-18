@@ -200,7 +200,7 @@ function contains_undefined(mixed: any): boolean {
       }
     });
   } else {
-    arg_contains_undefined = _.isUndefined(mixed);
+    arg_contains_undefined = mixed === undefined;
   }
 
   return arg_contains_undefined;

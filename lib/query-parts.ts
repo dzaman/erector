@@ -134,7 +134,7 @@ export abstract class List extends MultiValueQueryPart {
   }
 
   public is_source(): boolean {
-    return !_.isUndefined(this.content);
+    return this.content !== undefined;
   }
 
   protected abstract content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams;
