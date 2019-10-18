@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 
-import { isString } from './util';
+import { sort, isString } from './util';
 
 export abstract class QueryPartWithEscape extends QueryPart {
 
@@ -170,7 +170,7 @@ export class ListLabels extends List {
     const placeholders: string[] = [];
     const params: any[] = [];
 
-    const labels = _.isArray(content) ? content : _.sortBy(Object.keys(content));
+    const labels = _.isArray(content) ? content : sort(Object.keys(content));
 
     _.each(labels, (label: any) => {
       if (label instanceof QueryPart) {
@@ -199,7 +199,7 @@ export class ListValues extends List {
     const placeholders: string[] = [];
     const params: any[] = [];
 
-    const values = _.isArray(content) ? content : _.sortBy(Object.keys(content)).map((key: any) => (content as any)[key]);
+    const values = _.isArray(content) ? content : sort(Object.keys(content)).map((key: any) => (content as any)[key]);
 
     _.each(values, (value: any) => {
       if (value instanceof QueryPart) {
