@@ -136,7 +136,7 @@ export class Erector {
 
     // TODO: are these checks sufficient?
     // TODO: b_array is now guaranteed to be an array
-    if (b_array === undefined || _.isArray(b_array) && _.isEmpty(b_array)) {
+    if (b_array === undefined || _.isArray(b_array) && b_array.length === 0) {
       return '';
     } else {
       const text_parts: string[] = [];
