@@ -21,44 +21,34 @@ const {
   values,
 } = require('/lib/erector');
 
-// TODO: define when to use each
-
 const erector_module = require('/lib/erector');
-const child_process = require('child_process');
 
 describe('erector', () => {
-  test('typescript compilation of consumer', () => {
-    const result = child_process.spawnSync('node_modules/.bin/tsc', [
-      './tests/fixtures/erector-consumer.ts',
-      '--noEmit',
-      '--esModuleInterop',
-    ]);
-    expect(result.stdout.toString()).toMatchSnapshot();
-  });
+  describe('module exports', () => {
+    test('erector is a function', () => {
+      expect(erector_module.erector).toEqual(expect.any(Function));
+    });
 
-  test('erector is a function', () => {
-    expect(erector_module.erector).toEqual(expect.any(Function));
-  });
-
-  test.each([
-    'if',
-    'condition',
-    'and',
-    'or',
-    'cmp_subquery',
-    'cmp',
-    'set',
-    'setdefined',
-    'labels',
-    'values',
-    'raw',
-    'identifier',
-    'i',
-    'literal',
-    'l',
-  ])('%p is a function', (name) => {
-    expect(erector_module[name]).toEqual(expect.any(Function));
-    expect(erector_module.erector[name]).toEqual(expect.any(Function));
+    test.each([
+      'if',
+      'condition',
+      'and',
+      'or',
+      'cmp_subquery',
+      'cmp',
+      'set',
+      'setdefined',
+      'labels',
+      'values',
+      'raw',
+      'identifier',
+      'i',
+      'literal',
+      'l',
+    ])('%p is a function', (name) => {
+      expect(erector_module[name]).toEqual(expect.any(Function));
+      expect(erector_module.erector[name]).toEqual(expect.any(Function));
+    });
   });
 
   describe('Raw', () => {
