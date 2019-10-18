@@ -74,8 +74,9 @@ export class Erector {
     }
 
     // make sure lists are defined
-    _.each(list_references, (lists: List[], key: string) => {
-      _.each(lists, (list: List) => {
+    Object.keys(list_references).forEach((key: string) => {
+      const lists: List[] = list_references[key];
+      lists.forEach((list: List) => {
         if (key in list_sources) {
           list.set_source(list_sources[key]);
         } else {
@@ -154,7 +155,7 @@ export class Erector {
 
       const b_parts: string[] = [];
 
-      _.each(b_array, (b_element: any) => {
+      b_array.forEach((b_element: any) => {
         if (b_element instanceof QueryPart) {
           b_parts.push(b_element.placeholder);
           params.push(b_element.param());
@@ -232,7 +233,7 @@ export class Erector {
     const text_parts: string[] = [];
     const params: any[] = [];
 
-    _.each(keys, (key: any) => {
+    keys.forEach((key: any) => {
       const value = (<any>obj[key]);
 
       params.push(key);

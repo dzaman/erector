@@ -176,7 +176,7 @@ export class ListLabels extends List {
 
     const labels = Array.isArray(content) ? content : sort(Object.keys(content));
 
-    _.each(labels, (label: any) => {
+    labels.forEach((label: any) => {
       if (label instanceof QueryPart) {
         placeholders.push(label.placeholder);
         params.push(label.param());
@@ -205,7 +205,7 @@ export class ListValues extends List {
 
     const values = Array.isArray(content) ? content : sort(Object.keys(content)).map((key: any) => (content as any)[key]);
 
-    _.each(values, (value: any) => {
+    values.forEach((value: any) => {
       if (value instanceof QueryPart) {
         placeholders.push(value.placeholder);
         params.push(value.param());
