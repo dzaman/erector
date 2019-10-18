@@ -2,6 +2,8 @@ const _ = require('../vendor/lodash.custom.js');
 
 const { QueryPart } = require('./query-part-base');
 
+const { isTypedArray } = require('./util');
+
 export class EscapeLiteral {
 
   // pg version
@@ -186,7 +188,7 @@ export class WrapIdentifier {
 function contains_undefined(mixed: any): boolean {
   let arg_contains_undefined = false;
 
-  if (_.isTypedArray(mixed)) return false;
+  if (isTypedArray(mixed)) return false;
 
   if (_.isArray(mixed)) {
     for (let i = 0; i < mixed.length; i++) {
