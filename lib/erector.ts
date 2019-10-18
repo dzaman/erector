@@ -256,8 +256,10 @@ export class Erector {
     }
   }
 
-  public static setdefined(obj: object, options: SetOptions = {}): Statement | string {
-    const defined_object = _.reduce(obj, (acc: { [key: string]: any[] }, value: any, key: string) => {
+  public static setdefined(obj: { [index:string]: any }, options: SetOptions = {}): Statement | string {
+    const defined_object = Object.keys(obj).reduce((acc: { [key: string]: any[] }, key: string) => {
+      const value = obj[key];
+
       if (value !== undefined) {
         acc[key] = value;
       }
