@@ -222,7 +222,7 @@ export class Erector {
   public static set(obj: { [key: string]: any }, options: SetOptions = {}): Statement | string { 
     assert(_.isObject(obj), 'first parameter to set must be an object');
 
-    const keys = _.sortBy(_.keys(obj));
+    const keys = _.sortBy(Object.keys(obj));
 
     const text_parts: string[] = [];
     const params: any[] = [];
