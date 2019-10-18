@@ -27,3 +27,8 @@ var nodeUtil = (function() {
 }());
 
 export const isTypedArray = nodeUtil.isTypedArray;
+
+export const isObject = (value: any) => {
+  var type = typeof value;
+  return value != null && (type == 'object' || type == 'function');
+}
