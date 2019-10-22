@@ -147,10 +147,9 @@ describe('util', () => {
       // should return `true` for objects with a `valueOf` property
       [{ 'valueOf': 0 }, true],
 
-      // can't get this to pass
       // should return `true` for objects with a writable `Symbol.toStringTag` property
-      // [object_string_tag, true],
-      // [{ [Symbol.toStringTag]: 'X' }, true],
+      [object_writable_string_tag, true],
+      [{ [Symbol.toStringTag]: 'X' }, true],
 
       //  should return `false` for objects with a custom `[[Prototype]]`
       [Object.create({ a: 1 }), false],
@@ -173,11 +172,14 @@ describe('util', () => {
       [true, false],
       ['a', false],
       [Symbol('a'), false],
+
       // object with read-only toStringTag
       [object_read_only_string_tag, false],
+
       // should not mutate `value`??
       [object_tbd, false],
     ])('isPlainObject(%p) -> %p', (input, expected) => {
+      expect(_.isPlainObject(input)).toBe(expected);
       expect(util.isPlainObject(input)).toBe(expected);
     });
 

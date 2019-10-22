@@ -58,64 +58,28 @@ const baseGetTag = (value: any) => {
   } else if (value === null) {
     return '[object Null]';
   } else {
-    // was: (Symbol.toStringTag in Object(value)) ? getRawTag(value) : Object.prototype.toString.call(value);
-    return Object.prototype.toString.call(value);
+    return Symbol.toStringTag in Object(value) ? getRawTag(value) :  Object.prototype.toString.call(value);
   }
 }
 
-
-function getTag(value: any) {
-    if (value == null) {
-          return value === undefined ? '[object Undefined]' : '[object Null]'
-        }
-    return toString.call(value)
-}
-
-function isObjectLike(value: any) {
-    return typeof value === 'object' && value !== null
-}
-
 export const isPlainObject = (value: any) => {
-    if (!isObjectLike(value) || getTag(value) != '[object Object]') {
-          return false
-        }
-  // if (typeof value === 'object' && value !== null || baseGetTag(value) !== '[object Object]') {
-  //   return false;
-  // }
+  const is_object_like = typeof value === 'object' && value !== null;
+  const tag = baseGetTag(value);
+
+  if (!is_object_like || tag !== '[object Object]') {
+    return false
+  }
 
 
-  if (Object.getPrototypeOf(value) === null) {
-        return true
-      }
-    let proto = value
-    while (Object.getPrototypeOf(proto) !== null) {
-          proto = Object.getPrototypeOf(proto)
-        }
-    return Object.getPrototypeOf(value) === proto
+  let proto = Object.getPrototypeOf(Object(value));
+
+  if (proto === null) {
+    return true;
+  }
+
+  const Ctor = Object.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+  return typeof Ctor == 'function' && Ctor instanceof Ctor && Function.prototype.toString.call(Ctor) == Function.prototype.toString.call(Object);
 }
-
-
-//   // function overArg(func, transform) {
-//   //   return function(arg) {
-//   //     return func(transform(arg));
-//   //   };
-//   // }
-//   // overArg(Object.getPrototypeOf, Object)
-//   // handle null/undefined case
-//   var proto = Object.getPrototypeOf(Object(value));
-//   if (proto === null) {
-//     return true;
-//   }
-//   var Ctor = Object.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
-//   return typeof Ctor === 'function' && Ctor instanceof Ctor &&
-//     Function.prototype.toString.call(Ctor) === Function.prototype.toString.call(Object);
-// 
-//   // let proto = value
-//   // while (Object.getPrototypeOf(proto) !== null) {
-//   //   proto = Object.getPrototypeOf(proto)
-//   // }
-//   // return Object.getPrototypeOf(value) === proto
-// }
 
 export function contains_undefined(mixed: any): boolean {
   let arg_contains_undefined = false;
