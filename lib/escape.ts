@@ -5,6 +5,7 @@ const { QueryPart } = require('./query-part-base');
 const {
   contains_undefined,
   get_undefined_indices,
+  isPlainObject,
 } = require('./util');
 
 export class EscapeLiteral {
@@ -193,7 +194,7 @@ export class WrapIdentifier {
  * @param args      Single value, array of positional values, or object of named values
  */
 export const escape = (statement: string, value: any): string => {
-  if (_.isPlainObject(value)) {
+  if (isPlainObject(value)) {
     return escape_key_bindings(statement, value);
   } else {
     let values_array: any[] = [];
