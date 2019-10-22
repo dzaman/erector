@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 

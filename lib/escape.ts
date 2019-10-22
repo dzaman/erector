@@ -1,5 +1,3 @@
-const _ = require('../vendor/lodash.custom.js');
-
 const { QueryPart } = require('./query-part-base');
 
 const {

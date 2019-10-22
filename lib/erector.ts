@@ -1,4 +1,3 @@
-const _ = require('../vendor/lodash.custom.js');
 import assert from 'assert';
 
 import { QueryPart } from './query-part-base';
