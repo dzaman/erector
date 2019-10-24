@@ -144,34 +144,25 @@ export abstract class List extends MultiValueQueryPart {
 
   public abstract clone(): List;
 
-  public is_equal(other: List): boolean {
-    if ((this.content === undefined ? 1 : 0) ^ (other.content === undefined ? 1 : 0)) {
+  // returns true if list elements are the same
+  // does not care about name
+  public abstract elements(content?: any[] | { [index:string]: any }): any[] | undefined;
+
+  public is_content_equal(other: List): boolean {
+    const ours = this.elements();
+    const theirs = this.elements(other.content);
+
+    if (ours === undefined || theirs === undefined) {
       return false;
     }
 
-    // the or is necessary to shut the compiler up about other.content possibly not being defined
-    if (this.content === undefined || other.content === undefined) {
-      return true;
-    }
-
-    if (typeof this.content !== typeof other.content ||
-        Array.isArray(this.content) !== Array.isArray(other.content)) {
+    if (ours.length !== theirs.length) {
       return false;
     }
 
-    // the && is necessary to shut the compiler up about other.content not being an array
-    if (Array.isArray(this.content) && Array.isArray(other.content)) {
-      for (let i = 0; i < this.content.length; i += 1) {
-        if (this.content[i] !== other.content[i]) {
-          return false;
-        }
-      }
-    } else if (!Array.isArray(this.content) && !Array.isArray(other.content)) {
-      const keys = Object.keys(this.content);
-      for (let i = 0; i < keys.length; i += 1) {
-        if (this.content[i] !== other.content[i]) {
-          return false;
-        }
+    for (let i = 0; i < ours.length; i += 1) {
+      if (ours[i] !== theirs[i]) {
+        return false;
       }
     }
 
@@ -203,6 +194,20 @@ export interface PlaceholderAndParams {
 }
 
 export class ListLabels extends List {
+
+  public elements(other_content?: any[] | { [index:string]: any }): any[] | undefined {
+    const content = other_content || this.content;
+
+    if (content === undefined) {
+      return undefined;
+    }
+
+    if (Array.isArray(content)) {
+      return content;
+    } else {
+      return sort(Object.keys(content));
+    }
+  }
 
   protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
 
@@ -236,6 +241,21 @@ export class ListLabels extends List {
 
 // TODO: should lists ignore undefined values?
 export class ListValues extends List {
+
+  public elements(other_content?: any[] | { [index:string]: any }): any[] | undefined {
+    if (this.content === undefined) {
+      return undefined;
+    }
+
+    if (Array.isArray(this.content)) {
+      return this.content;
+    } else {
+      return sort(Object.keys(this.content)).map((key) => {
+        const content = this.content as { [index: string]: any };
+        return content[key];
+      });
+    }
+  }
 
   protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
 

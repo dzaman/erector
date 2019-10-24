@@ -3,6 +3,7 @@ const {
   Literal,
   Raw,
 
+  List,
   ListValues,
   ListLabels,
 
@@ -82,8 +83,36 @@ describe('query-parts', () => {
         list.source = list;
         expect(() => list.format()).toThrow('No list source is available');
       });
-  
+
+      test.each([
+        [ 
+          new ListValues([1, 2, 3]),
+          new ListValues([1, 2, 3]),
+          true,
+        ], [
+          new ListLabels([1, 2, 3]),
+          new ListLabels([1, 2, 3]),
+          true,
+        ], [
+          new ListLabels({ a: 1, b: 2 }),
+          new ListLabels({ a: 1, b: 2 }),
+          true,
+        ], [
+          new ListValues({ a: 1, b: 2 }),
+          new ListValues({ a: 1, b: 2 }),
+          true,
+        ], [
+          new ListLabels({ a: 1, b: 2 }),
+          new ListValues([1, 2]),
+          true,
+        ]
+      ])('is_content_equal %p %p', (a, b, expected) => {
+        expect(a.is_content_equal(b)).toBe(expected);
+      });
     });
+  
+    // describe('ListValues & ListLabels', () => {
+    // });
   
     describe('ListValues', () => {
       test.each([
