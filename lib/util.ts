@@ -11,6 +11,13 @@ export const sort = (value: any[]): any[] => {
   return value;
 };
 
+export const unique = (value: any[]): any[] => {
+  return Object.keys(value.reduce((acc, el) => {
+    acc[el] = true;
+    return acc;
+  }, {}));
+};
+
 // https://github.com/lodash/lodash/blob/4.17.15/lodash.js#L436
 const node_util = (function() {
   try {

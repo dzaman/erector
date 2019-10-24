@@ -63,7 +63,7 @@ export class Erector {
         const exp = exps[i] = exps[i].clone();
         if (exp.is_source()) {
           if (list_sources[exp.name]) {
-            if (!exp.is_content_equal(list_sources[exp.name])) {
+            if (!exp.is_equal(list_sources[exp.name])) {
               throw Error(`${exp.name} has two different values in this context`);
             }
           } else {
