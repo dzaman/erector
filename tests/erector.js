@@ -71,6 +71,18 @@ describe('erector', () => {
       ])('%p', (_name, result, expected) => {
         expect(result.toString()).toBe(expected);
       });
+
+      test.each([
+        ['sources both defined and the same is ok', () => { erector`insert into (${labels('foo', [1])}) values (${values('foo', [1])})` }]
+      ])('%p', (_name, fn) => {
+        expect(fn).not.toThrowError();
+      });
+
+      test.each([
+        ['multiple references to the same source is ok', () => { erector`insert into (${labels('foo', [1])}) values ((${values('foo')}), (${values('foo')}))` }]
+      ])('%p', (_name, fn) => {
+        expect(fn).not.toThrowError();
+      });
   
       test.each([
         ['sources, if both defined, must be the same', () => { erector`insert into (${labels('foo', [1])}) values (${values('foo', [2])})` }, 'foo has two different values in this context'],
