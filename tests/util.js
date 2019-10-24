@@ -167,5 +167,26 @@ describe('util', () => {
       expect(util.get_undefined_indices(123)).toEqual([0]);
     });
   });
+
+  describe('contains_undefined', () => {
+    test('returns true if undefined', () => {
+      expect(util.contains_undefined(undefined)).toBe(true);
+    });
+
+    test('returns true if undefined exists in an array', () => {
+      expect(util.contains_undefined([undefined])).toBe(true);
+      expect(util.contains_undefined([0, undefined, 1])).toBe(true);
+    });
+
+    test('returns true if undefined exists in an object', () => {
+      expect(util.contains_undefined({ a: undefined })).toBe(true);
+      expect(util.contains_undefined({ a: undefined, b: true })).toBe(true);
+    });
+
+    test('returns true if undefined exists in sub-structures', () => {
+      expect(util.contains_undefined({ a: [undefined] })).toBe(true);
+      expect(util.contains_undefined([{ a: undefined }])).toBe(true);
+    });
+  });
 });
 

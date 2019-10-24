@@ -152,7 +152,7 @@ export abstract class List extends MultiValueQueryPart {
 
     // the or is necessary to shut the compiler up about other.content possibly not being defined
     if (this.content === undefined || other.content === undefined) {
-      return true;
+      return false;
     }
 
     if (typeof this.content !== typeof other.content ||

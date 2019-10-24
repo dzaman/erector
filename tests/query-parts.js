@@ -136,6 +136,22 @@ describe('query-parts', () => {
           new ListLabels({ a: 1, b: 2 }),
           new ListValues({ a: 1 }),
           false,
+        ], [
+          new ListLabels(),
+          new ListLabels([1]),
+          false,
+        ], [
+          new ListValues([1]),
+          new ListValues(),
+          false,
+        ], [
+          new ListLabels(),
+          new ListValues(),
+          false,
+        ], [
+          new ListLabels([1, 2, 3]),
+          new ListValues({ a: 1, b: 2 }),
+          false,
         ],
       ])('is_content_equal %p %p', (a, b, expected) => {
         expect(a.is_content_equal(b)).toBe(expected);
