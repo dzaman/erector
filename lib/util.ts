@@ -128,7 +128,3 @@ export const get_undefined_indices = (mixed: any): Array<string|number> => {
   return indices;
 }
 
-// export const is_equal = (any[] | object): boolean => {
-//   // const is_equal = !!exp.content!.find((i) => exp.content[i] !== list_sources[exp.name][i]);
-// };
-
