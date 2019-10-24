@@ -2,8 +2,8 @@ import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 
 import {
-  isObject,
-  isString,
+  is_object,
+  is_string,
   sort,
 } from './util';
 
@@ -106,11 +106,11 @@ export abstract class List extends MultiValueQueryPart {
   constructor(...args: any[]) {
     super();
 
-    this.name = isString(args[0]) ? args[0] : '_';
+    this.name = is_string(args[0]) ? args[0] : '_';
 
     // content is args 0 or 1, whichever is an array or object
     for (let i = 0; i < args.length; i++) {
-      if (Array.isArray(args[i]) || isObject(args[i])) {
+      if (Array.isArray(args[i]) || is_object(args[i])) {
         this.content = args[i];
       }
     }

@@ -3,7 +3,7 @@ import assert from 'assert';
 import { QueryPart } from './query-part-base';
 
 import {
-  isObject,
+  is_object,
   sort,
 } from './util';
 
@@ -228,7 +228,7 @@ export class Erector {
 
   // lol 😂
   public static set(obj: { [key: string]: any }, options: SetOptions = {}): Statement | string { 
-    assert(isObject(obj), 'first parameter to set must be an object');
+    assert(is_object(obj), 'first parameter to set must be an object');
 
     const keys = sort(Object.keys(obj));
 

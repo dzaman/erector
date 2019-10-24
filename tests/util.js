@@ -7,7 +7,7 @@ const util = require('/lib/util');
 const ARGS = (() => arguments).apply(undefined, [1, 2, 3]);
 
 describe('util', () => {
-  describe('isString', () => {
+  describe('is_string', () => {
     test.each([
       // test inputs are from from Lodash
       // https://github.com/lodash/lodash/blob/master/test/isString.test.js
@@ -24,7 +24,8 @@ describe('util', () => {
       [/x/, false],
       [Symbol('a'), false],
     ])('format with override %p -> %p', (input, expected) => {
-      expect(util.isString(input)).toBe(expected);
+      expect(_.isString(input)).toBe(expected);
+      expect(util.is_string(input)).toBe(expected);
     });
   });
 
@@ -42,40 +43,7 @@ describe('util', () => {
     });
   });
 
-  // this is imported directly and probably doesn't need a test
-  describe.skip('isTypedArray', () => {
-    test.each([
-      [new Int8Array(), true],
-      [new Uint8Array(), true],
-      [new Uint8ClampedArray(), true],
-      [new Int16Array(), true],
-      [new Uint16Array(), true],
-      [new Int32Array(), true],
-      [new Uint32Array(), true],
-      [new Float32Array(), true],
-      [new Float64Array(), true],
-      // [new BigInt64Array(), true],
-      // [new BigUint64Array(), true],
-      // test inputs are from from Lodash
-      // https://github.com/lodash/lodash/blob/master/test/isTypedArray.js
-      [ARGS, false],
-      [[1, 2, 3], false],
-      [true, false],
-      [new Date, false],
-      [new Error, false],
-      [() => null, false],
-      [{ 'a': 1 }, false],
-      [1, false],
-      [/x/, false],
-      ['a', false],
-      [Symbol('a'), false],
-    ])('format with override %p -> %p', (input, expected) => {
-      expect(util.isTypedArray(input)).toBe(expected);
-    });
-
-  });
-
-  describe('isObject', () => {
+  describe('is_object', () => {
     test.each([
       [, false],
       [null, false],
@@ -101,11 +69,12 @@ describe('util', () => {
       [/x/, true],
       [Object('a'), true],
     ])('format with override %p -> %p', (input, expected) => {
-      expect(util.isObject(input)).toBe(expected);
+      expect(_.isObject(input)).toBe(expected);
+      expect(util.is_object(input)).toBe(expected);
     });
   });
 
-  describe('isPlainObject', () => {
+  describe('is_plain_object', () => {
     function SimpleConstructor() {
       this.a = 1;
     }
@@ -178,9 +147,9 @@ describe('util', () => {
 
       // should not mutate `value`??
       [object_tbd, false],
-    ])('isPlainObject(%p) -> %p', (input, expected) => {
+    ])('is_plain_object(%p) -> %p', (input, expected) => {
       expect(_.isPlainObject(input)).toBe(expected);
-      expect(util.isPlainObject(input)).toBe(expected);
+      expect(util.is_plain_object(input)).toBe(expected);
     });
 
   });
