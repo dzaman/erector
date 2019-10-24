@@ -1,9 +1,9 @@
-const _ = require('../vendor/lodash.custom.js');
-
 const { QueryPart } = require('./query-part-base');
 
 const {
-  isTypedArray,
+  contains_undefined,
+  get_undefined_indices,
+  is_plain_object,
 } = require('./util');
 
 export class EscapeLiteral {
@@ -187,57 +187,12 @@ export class WrapIdentifier {
   }
 }
 
-function contains_undefined(mixed: any): boolean {
-  let arg_contains_undefined = false;
-
-  if (isTypedArray(mixed)) return false;
-
-  if (Array.isArray(mixed)) {
-    for (let i = 0; i < mixed.length; i++) {
-      if (arg_contains_undefined) break;
-      arg_contains_undefined = contains_undefined(mixed[i]);
-    }
-  } else if (_.isPlainObject(mixed)) {
-    Object.keys(mixed).forEach((key) => {
-      if (!arg_contains_undefined) {
-        arg_contains_undefined = contains_undefined(mixed[key]);
-      }
-    });
-  } else {
-    arg_contains_undefined = mixed === undefined;
-  }
-
-  return arg_contains_undefined;
-}
-
-function get_undefined_indices(mixed: any): Array<string|number> {
-  const indices = [];
-
-  if (Array.isArray(mixed)) {
-    mixed.forEach((item, index) => {
-      if (contains_undefined(item)) {
-        indices.push(index);
-      }
-    });
-  } else if (_.isPlainObject(mixed)) {
-    Object.keys(mixed).forEach((key) => {
-      if (contains_undefined(mixed[key])) {
-        indices.push(key);
-      }
-    });
-  } else {
-    indices.push(0);
-  }
-
-  return indices;
-}
-
 /**
  * @param statement A SQL string with literal (?, :name) and identifier (??, :name:) placeholders
  * @param args      Single value, array of positional values, or object of named values
  */
 export const escape = (statement: string, value: any): string => {
-  if (_.isPlainObject(value)) {
+  if (is_plain_object(value)) {
     return escape_key_bindings(statement, value);
   } else {
     let values_array: any[] = [];

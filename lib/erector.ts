@@ -1,10 +1,11 @@
-const _ = require('../vendor/lodash.custom.js');
 import assert from 'assert';
 
 import { QueryPart } from './query-part-base';
 
+export * from './query-part-base';
+
 import {
-  isObject,
+  is_object,
   sort,
 } from './util';
 
@@ -19,6 +20,8 @@ import {
   Statement,
   StatementParam,
 } from './query-parts';
+
+export * from './query-parts';
 
 export class Erector {
 
@@ -35,8 +38,8 @@ export class Erector {
    * @param strings   Comment for `strings`
    */
   public static template(_strings: string[], ..._exps: any[]) {
-    const strings: string[] = _.clone(_strings);
-    const exps: any[] = _.clone(_exps);
+    const strings: string[] = _strings.map((el) => el);
+    const exps: any[] = _exps.map((exp) => exp);
 
     // return _generate_statement(
     //   strings,
@@ -52,12 +55,15 @@ export class Erector {
     const list_references: { [key: string]: List[] } = {};
 
     for (let i = 0; i < exps.length; i += 1) {
-      const exp = exps[i] = this._resolve_function_recursively(exps[i]);
+      exps[i] = this._resolve_function_recursively(exps[i]);
 
-      if (exp instanceof List) {
+      if (exps[i] instanceof List) {
+        // TODO(dzaman 2019-10-20): make a constructor for this or a factory method
+        // exps[i] = new (exp.constructor)(exp.name, exp.content);
+        const exp = exps[i] = exps[i].clone();
         if (exp.is_source()) {
           if (list_sources[exp.name]) {
-            if (!_.isEqual(exp, list_sources[exp.name])) {
+            if (!exp.is_content_equal(list_sources[exp.name])) {
               throw Error(`${exp.name} has two different values in this context`);
             }
           } else {
@@ -226,7 +232,7 @@ export class Erector {
 
   // lol 😂
   public static set(obj: { [key: string]: any }, options: SetOptions = {}): Statement | string { 
-    assert(isObject(obj), 'first parameter to set must be an object');
+    assert(is_object(obj), 'first parameter to set must be an object');
 
     const keys = sort(Object.keys(obj));
 

@@ -176,6 +176,10 @@ describe('escape literals', () => {
     expect(EscapeLiteral.escape_value(() => 'foo')).toBe(`'foo'`);
   });
 
+  test('backslashes are escaped', () => {
+    expect(EscapeLiteral.escape_value(`\\foo`)).toBe(`E'\\\\foo'`);
+  });
+
 });
 
 describe('wrap identifier', () => {

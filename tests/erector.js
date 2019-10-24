@@ -1,15 +1,4 @@
 const {
-  Identifier,
-  Literal,
-  Raw,
-
-  ListValues,
-  ListLabels,
-
-  Statement,
-} = require('/lib/query-parts');
-
-const {
   e,
   erector,
 
@@ -19,6 +8,15 @@ const {
 
   labels,
   values,
+
+  Identifier,
+  Literal,
+  Raw,
+
+  ListValues,
+  ListLabels,
+
+  Statement,
 } = require('/lib/erector');
 
 const erector_module = require('/lib/erector');
@@ -45,212 +43,20 @@ describe('erector', () => {
       'i',
       'literal',
       'l',
+      // 'Literal',
+      // 'Identifier',
+      // 'Statement',
+      // 'List',
+      // 'ListValues',
+      // 'ListLabels',
+      // 'Raw',
     ])('%p is a function', (name) => {
       expect(erector_module[name]).toEqual(expect.any(Function));
       expect(erector_module.erector[name]).toEqual(expect.any(Function));
     });
   });
-
-  describe('Raw', () => {
-    test('is exported as a class', () => {
-      expect(Raw).toEqual(expect.any(Function));
-    });
-  
-    test('text is passed through as-is', () => {
-      expect((new Raw('Bobby; DROP "user"').format())).toBe('Bobby; DROP "user"');
-    });
-  
-    test('raw supports templates', () => {
-      expect(raw`x ${'y'} z`).toStrictEqual(new Raw('x y z'));
-    });
-  });
-  
-  describe('Identifier', () => {
-    test('is exported as a class', () => {
-      expect(Identifier).toEqual(expect.any(Function));
-    });
-  
-    test('text is escaped as an identifier', () => {
-      expect((new Identifier('fox.user')).format()).toBe('"fox"."user"');
-    });
-  
-    test('also exported as i and erector.identifier', () => {
-      expect(i).toBe(erector.identifier);
-      expect(i).toEqual(expect.any(Function));
-      expect(erector.identifier).toEqual(expect.any(Function));
-    });
-  
-    test('i/identifier equls new Identifier()', () => {
-      expect(i`fox.user`).toStrictEqual(new Identifier('fox.user'));
-    });
-  
-    test('i supports templates', () => {
-      expect(i`x ${'y'} z`).toStrictEqual(new Identifier('x y z'));
-    });
-  });
-  
-  describe('Literal', () => {
-    test('is exported as a class', () => {
-      expect(Identifier).toEqual(expect.any(Function));
-    });
-  
-    test('text is escaped as a literal', () => {
-      expect((new Literal(`F'oo`)).format()).toBe(`'F''oo'`);
-    });
-  
-    test('also exported as l and erector.literal', () => {
-      expect(l).toBe(erector.literal);
-      expect(l).toEqual(expect.any(Function));
-      expect(erector.literal).toEqual(expect.any(Function));
-    });
-  
-    test('l/literal equals new Literal()', () => {
-      expect(l`F'oo`).toStrictEqual(new Literal(`F'oo`));
-    });
-  
-    test('l supports templates', () => {
-      expect(l`x ${'y'} z`).toStrictEqual(new Literal('x y z'));
-    });
-  });
-  
-  describe('List', () => {
-    describe.each([
-      ListValues,
-      ListLabels,
-    ])('%p (shared)', (class_ref) => {
-      test.each([
-        [[], '_', undefined, false],
-        [['foo'], 'foo', undefined, false],
-        [[['a']], '_', ['a'], true],
-        [[{ a: 1 }], '_', { a: 1 }, true],
-        [['foo', ['a']], 'foo', ['a'], true],
-        [['foo', { a: 1 }], 'foo', { a: 1 }, true],
-      ])('can be constructed with %p -> name: %p, content: %p, is_source: %p', (params, name, content, is_source) => {
-        const list = new class_ref(...params);
-        expect(list.name).toEqual(name);
-        expect(list.content).toEqual(content);
-        expect(list.is_source()).toEqual(is_source);
-      });
-  
-      test.each([
-        [[new Literal('a'), new Literal(2)], `'a', 2`],
-        [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
-      ])('format with override %p -> %p', (content, expected) => {
-        const list = new class_ref(content);
-        expect(list.format()).toBe(expected);
-      });
-  
-      test('errors when formatting without a source (no source)', () => {
-        const list = new class_ref();
-        expect(() => list.format()).toThrow('No list source is available');
-      });
-  
-      test('errors when formatting without a source (source is not a source)', () => {
-        const list = new class_ref();
-        list.source = list;
-        expect(() => list.format()).toThrow('No list source is available');
-      });
-  
-    });
-  
-    describe('ListValues', () => {
-      test.each([
-        [
-          ['a', 'b'],
-          `'a', 'b'`
-        ], [
-          { a: 1, b: 2 },
-          `1, 2`
-        ], [
-          [new Literal('a'), new Literal(2)],
-          `'a', 2`
-        ], [
-          { a: new Literal('a'), b: new Literal(2) },
-          `'a', 2`
-        ], [
-          [new Raw('foo()'), new Identifier('bar')],
-          `foo(), "bar"`
-        ], [
-          { a: new Raw('foo()'), b: new Identifier('bar') },
-          `foo(), "bar"`
-        ],
-      ])('format with default %p -> %p', (content, expected) => {
-        const list = new ListValues(content);
-        expect(list.format()).toBe(expected);
-      });
-    });
-  
-    describe('ListLabels', () => {
-      test.each([
-        [
-          ['a', 'b'],
-          '"a", "b"',
-        ], [
-          { a: 1, b: 2 },
-          '"a", "b"',
-        ], [
-          [new Literal('a'), new Literal(2)],
-          `'a', 2`,
-        ], [
-          { a: new Literal('a'), b: new Literal(2) },
-          `"a", "b"`,
-        ], [
-          [new Raw('foo()'), new Identifier('bar')],
-          `foo(), "bar"`,
-        ], [
-          { a: new Raw('foo()'), b: new Identifier('bar') },
-          `"a", "b"`,
-        ],
-      ])('format %p -> %p', (content, expected) => {
-        const list = new ListLabels(content);
-        expect(list.format()).toBe(expected);
-      });
-    });
-  
-    describe('ListValues & ListLabels', () => {
-      test.each([
-        [
-          new ListLabels(),
-          new ListValues({ a: 1, b: 2 }),
-          '"a", "b"',
-        ], [
-          new ListValues(),
-          new ListLabels({ a: 1, b: 2 }),
-          `1, 2`,
-        ],
-      ])('%o come from %o source', (target, source, expected) => {
-        target.set_source(source);
-        expect(target.format()).toBe(expected);
-      });
-  
-      test.each([
-        [
-          'cannot set the source of a source', 
-          new ListValues([true]),
-          new ListValues([true]),
-          undefined,
-        ], [
-          'cannot set the source to be a non-source list',
-          new ListValues(),
-          new ListValues(),
-          undefined,
-        ], [
-          'cannot set the source for a different name',
-          new ListValues('foo'),
-          new ListValues('bar', [true]),
-          'source has a different name (foo != bar)',
-        ]
-      ])('%p', (name, destination, source, custom_expected) => {
-        const expected = custom_expected ? custom_expected : name;
-        expect(() => destination.set_source(source)).toThrow(expected);
-      });
-  
-    });
-  
-  });
   
   describe('erector', () => {
-  
     describe('template', () => {
       test.each([
         ['placeholder at end', erector`hello ${'world'}`, `hello 'world'`],
@@ -264,6 +70,18 @@ describe('erector', () => {
         ['functions are resolved', erector`hello ${() => 'world'}`, `hello 'world'`],
       ])('%p', (_name, result, expected) => {
         expect(result.toString()).toBe(expected);
+      });
+
+      test.each([
+        ['sources both defined and the same is ok', () => { erector`insert into (${labels('foo', [1])}) values (${values('foo', [1])})` }]
+      ])('%p', (_name, fn) => {
+        expect(fn).not.toThrowError();
+      });
+
+      test.each([
+        ['multiple references to the same source is ok', () => { erector`insert into (${labels('foo', [1])}) values ((${values('foo')}), (${values('foo')}))` }]
+      ])('%p', (_name, fn) => {
+        expect(fn).not.toThrowError();
       });
   
       test.each([
@@ -513,5 +331,47 @@ describe('erector', () => {
       });
     });
   
+    describe('Literal/l/literal', () => {
+  
+      test('exports l and erector.literal', () => {
+        expect(l).toBe(erector.literal);
+        expect(l).toEqual(expect.any(Function));
+        expect(erector.literal).toEqual(expect.any(Function));
+      });
+
+      test('new Literal()', () => {
+        expect(l`F'oo`).toStrictEqual(new Literal(`F'oo`));
+      });
+    
+      test('supports templates', () => {
+        expect(l`x ${'y'} z`).toStrictEqual(new Literal('x y z'));
+      });
+    });
+
+    describe('Identifier/i/identifier', () => {
+      test('also exported as i and erector.identifier', () => {
+        expect(i).toBe(erector.identifier);
+        expect(i).toEqual(expect.any(Function));
+        expect(erector.identifier).toEqual(expect.any(Function));
+      });
+    
+      test('i/identifier equls new Identifier()', () => {
+        expect(i`fox.user`).toStrictEqual(new Identifier('fox.user'));
+      });
+    
+      test('i supports templates', () => {
+        expect(i`x ${'y'} z`).toStrictEqual(new Identifier('x y z'));
+      });
+    });
+
+    describe('Raw/raw', () => {
+      test('is exported as a class', () => {
+        expect(Raw).toEqual(expect.any(Function));
+      });
+    
+      test('raw supports templates', () => {
+        expect(raw`x ${'y'} z`).toStrictEqual(new Raw('x y z'));
+      });
+    });
   });
 });

@@ -1,12 +1,11 @@
-import _ from 'lodash';
-
 import { QueryPart } from './query-part-base';
 import { escape } from './escape';
 
 import {
-  isObject,
-  isString,
+  is_object,
+  is_string,
   sort,
+  unique,
 } from './util';
 
 export abstract class QueryPartWithEscape extends QueryPart {
@@ -98,20 +97,21 @@ export class Identifier extends EscapedSingleValueQueryPart {
 export abstract class List extends MultiValueQueryPart {
 
   public name: string;
-  public content?: any[] | object;
+  public content?: any[] | { [index:string]: any };
   public source?: List;
 
   constructor();
-  constructor(content: any[] | object);
+  constructor(content: any[] | { [index:string]: any });
   constructor(name: string);
-  constructor(name: string, content: any[] | object);
+  constructor(name: string, content: any[] | { [index:string]: any });
   constructor(...args: any[]) {
     super();
 
-    this.name = isString(args[0]) ? args[0] : '_';
+    this.name = is_string(args[0]) ? args[0] : '_';
 
+    // content is args 0 or 1, whichever is an array or object
     for (let i = 0; i < args.length; i++) {
-      if (Array.isArray(args[i]) || isObject(args[i])) {
+      if (Array.isArray(args[i]) || is_object(args[i])) {
         this.content = args[i];
       }
     }
@@ -141,7 +141,46 @@ export abstract class List extends MultiValueQueryPart {
     return this.content !== undefined;
   }
 
-  protected abstract content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams;
+  protected abstract content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams;
+
+  public abstract clone(): List;
+
+  public is_content_equal(other: List): boolean {
+    if ((this.content === undefined ? 1 : 0) ^ (other.content === undefined ? 1 : 0)) {
+      return false;
+    }
+
+    // the or is necessary to shut the compiler up about other.content possibly not being defined
+    if (this.content === undefined || other.content === undefined) {
+      return false;
+    }
+
+    if (typeof this.content !== typeof other.content ||
+        Array.isArray(this.content) !== Array.isArray(other.content)) {
+      return false;
+    }
+
+    // the && is necessary to shut the compiler up about other.content not being an array
+    if (Array.isArray(this.content) && Array.isArray(other.content)) {
+      for (let i = 0; i < this.content.length; i += 1) {
+        if (this.content[i] !== other.content[i]) {
+          return false;
+        }
+      }
+    } else if (!Array.isArray(this.content) && !Array.isArray(other.content)) {
+      const keys = unique([
+        ...Object.keys(this.content),
+        ...Object.keys(other.content),
+      ]);
+      for (let i = 0; i < keys.length; i += 1) {
+        if (this.content[keys[i]] !== other.content[keys[i]]) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
 
   public format(): string {
 
@@ -150,7 +189,7 @@ export abstract class List extends MultiValueQueryPart {
     }
 
     // we know this to be true
-    const content = this.content || this.source!.content as any[] | object;
+    const content = this.content || this.source!.content as any[] | { [index:string]: any };
 
     const {
       placeholders,
@@ -169,7 +208,7 @@ export interface PlaceholderAndParams {
 
 export class ListLabels extends List {
 
-  protected content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams {
+  protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -193,12 +232,16 @@ export class ListLabels extends List {
 
   }
 
+  public clone(): ListLabels {
+    return this.content ? new ListLabels(this.name, this.content) : new ListLabels(this.name);
+  }
+
 }
 
 // TODO: should lists ignore undefined values?
 export class ListValues extends List {
 
-  protected content_to_placeholders_and_params(content: any[] | object): PlaceholderAndParams {
+  protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -221,6 +264,10 @@ export class ListValues extends List {
       params,
     }; 
 
+  }
+
+  public clone(): ListValues {
+    return this.content ? new ListValues(this.name, this.content) : new ListValues(this.name);
   }
 
 }
