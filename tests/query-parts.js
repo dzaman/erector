@@ -84,6 +84,9 @@ describe('query-parts', () => {
         expect(() => list.format()).toThrow('No list source is available');
       });
 
+    });
+  
+    describe('ListValues & ListLabels', () => {
       test.each([
         [ 
           new ListValues([1, 2, 3]),
@@ -138,9 +141,6 @@ describe('query-parts', () => {
         expect(a.is_content_equal(b)).toBe(expected);
       });
     });
-  
-    // describe('ListValues & ListLabels', () => {
-    // });
   
     describe('ListValues', () => {
       test.each([

@@ -153,5 +153,19 @@ describe('util', () => {
     });
 
   });
+
+  describe('get_undefined_indices', () => {
+    test('returns undefined elements in an array', () => {
+      expect(util.get_undefined_indices({ a: 1, b: undefined })).toEqual(['b']);
+    });
+
+    test('returns undefined elements in a hash', () => {
+      expect(util.get_undefined_indices([1, undefined, 2, undefined])).toEqual([1, 3]);
+    });
+
+    test('returns 0 if param is not an array or hash', () => {
+      expect(util.get_undefined_indices(123)).toEqual([0]);
+    });
+  });
 });
 

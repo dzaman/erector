@@ -24,6 +24,7 @@ const node_util = (function() {
     // Use `util.types` for Node.js 10+.
     var types = util.types;
 
+    /* istanbul ignore if */
     if (types) {
       return types;
     }
