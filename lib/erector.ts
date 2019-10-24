@@ -2,6 +2,8 @@ import assert from 'assert';
 
 import { QueryPart } from './query-part-base';
 
+export * from './query-part-base';
+
 import {
   is_object,
   sort,
@@ -18,6 +20,8 @@ import {
   Statement,
   StatementParam,
 } from './query-parts';
+
+export * from './query-parts';
 
 export class Erector {
 
