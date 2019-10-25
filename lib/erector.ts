@@ -34,33 +34,29 @@ export class Erector {
     return exp;
   }
 
-  /**
-   * @param strings   Comment for `strings`
-   */
-  public static template(_strings: string[], ..._exps: any[]) {
-    const strings: string[] = _strings.map((el) => el);
-    const exps: any[] = _exps.map((exp) => exp);
+  protected static _set_list_sources(list_sources: { [key: string]: List }, list_references: { [key: string]: List[] }): void {
+    Object.keys(list_references).forEach((key: string) => {
+      const lists: List[] = list_references[key];
+      lists.forEach((list: List) => {
+        if (key in list_sources) {
+          list.set_source(list_sources[key]);
+        } else {
+          throw Error(`No source found for ${key}`);
+        }
+      });
+    });
+  }
 
-    // return _generate_statement(
-    //   strings,
-    //   _set_list_sources(
-    //     _resolve_functions_recursively(exps)
-    //   )
-    // );
+  protected static _prepare_exp(_exp: any, list_sources: { [key: string]: List }, list_references: { [key: string]: List[] }): any {
+    let exp = this._resolve_function_recursively(_exp);
 
-    let text_parts: string[] = [];
-    let params: any[] = [];
+    if (exp instanceof List) {
+      // TODO(dzaman 2019-10-20): make a constructor for this or a factory method
+      // exps[i] = new (exp.constructor)(exp.name, exp.content);
+      exp = exp.clone();
 
-    const list_sources: { [key: string]: List } = {};
-    const list_references: { [key: string]: List[] } = {};
-
-    for (let i = 0; i < exps.length; i += 1) {
-      exps[i] = this._resolve_function_recursively(exps[i]);
-
-      if (exps[i] instanceof List) {
-        // TODO(dzaman 2019-10-20): make a constructor for this or a factory method
-        // exps[i] = new (exp.constructor)(exp.name, exp.content);
-        const exp = exps[i] = exps[i].clone();
+      // TypeScript was confused about exp's value, even with casting (as/<>)
+      if (exp instanceof List) {
         if (exp.is_source()) {
           if (list_sources[exp.name]) {
             if (!exp.is_content_equal(list_sources[exp.name])) {
@@ -79,17 +75,34 @@ export class Erector {
       }
     }
 
-    // make sure lists are defined
-    Object.keys(list_references).forEach((key: string) => {
-      const lists: List[] = list_references[key];
-      lists.forEach((list: List) => {
-        if (key in list_sources) {
-          list.set_source(list_sources[key]);
-        } else {
-          throw Error(`No source found for ${key}`);
-        }
-      });
-    });
+    return exp;
+  }
+
+  protected static _prepare_exps(exps: any[]): any[] {
+    const list_sources: { [key: string]: List } = {};
+    const list_references: { [key: string]: List[] } = {};
+
+    const prepared_exps = [];
+
+    for (let i = 0; i < exps.length; i += 1) {
+      prepared_exps[i] = this._prepare_exp(exps[i], list_sources, list_references);
+    }
+
+    // define list sources
+    this._set_list_sources(list_sources, list_references);
+
+    return prepared_exps;
+  }
+
+  /**
+   * @param strings   Comment for `strings`
+   */
+  public static template(_strings: string[], ..._exps: any[]) {
+    const strings: string[] = _strings.map((el) => el);
+    const exps: any[] = this._prepare_exps(_exps);
+
+    let text_parts: string[] = [];
+    let params: any[] = [];
 
     for (let i = 0; i < strings.length - 1; i += 1) {
       const exp = exps[i];
