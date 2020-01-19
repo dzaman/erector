@@ -3,6 +3,13 @@
   "version": "0.0.1",
   "description": "SQL Query Builder for Postgres",
   "main": "lib/erector.js",
+  "release": {
+    "branches": [
+      { "name": "alpha", "prerelease": true },
+      { "name": "beta", "prerelease": true },
+      "master"
+    ]
+  },
   "scripts": {
     "build": "node_modules/.bin/tsc -p .",
     "build+test": "npm run build && npm run test-build",
@@ -24,7 +31,9 @@
     "email": "<matthew@dzaman.org>"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "semantic-release": "^16.0.2"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.18",
     "@types/lodash": "^4.14.141",
