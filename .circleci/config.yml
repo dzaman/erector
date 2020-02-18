@@ -90,12 +90,19 @@ jobs:
           name: Report coverage stats
           command: npm run coverage-post
 
+  release-preview:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - install
+      - run: npx semantic-release --dry-run 
+
   release:
     docker:
       - image: circleci/node:lts
     steps:
       - install
-      - run: npx semantic-release --dry-run
+      - run: npx semantic-release
 
   test-node-6:
     docker:
@@ -149,7 +156,11 @@ workflows:
       - build-for-dist:
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - pre-alpha
+                - alpha
+                - beta
 
       # could conditionally test 6..12 based on PR attrs (label, dest branch) w/ "when:" or "filters"
 
@@ -182,10 +193,20 @@ workflows:
           requires:
             - build-for-dist
 
-      - release:
+      - release-preview:
           requires:
             - test-node-8
             - test-node-9
             - test-node-10
             - test-node-11
             - test-node-12
+
+      - release-approval:
+          type: approval
+          requires:
+              - release-preview
+
+      - release:
+          requires:
+              - release-approval
+
