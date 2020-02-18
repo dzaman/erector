@@ -1,5 +1,6 @@
 {
   "branches": [
+    { "name": "pre-alpha", "prerelease": true },
     { "name": "alpha", "prerelease": true },
     { "name": "beta", "prerelease": true },
     "master",
