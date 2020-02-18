@@ -1,6 +1,5 @@
 {
-  "name": "erector",
-  "version": "0.0.0",
+  "name": "sql-erector",
   "description": "SQL Query Builder for Postgres",
   "main": "lib/erector.js",
   "release": {
