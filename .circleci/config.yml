@@ -194,6 +194,14 @@ workflows:
             - build-for-dist
 
       - release-preview:
+          filters:
+              branches:
+                only:
+                  - pre-alpha
+                  - alpha
+                  - beta
+                  - /+([0-9])?(.{+([0-9]),x}).x/
+                
           requires:
             - test-node-8
             - test-node-9
@@ -207,6 +215,13 @@ workflows:
               - release-preview
 
       - release:
+          filters:
+              branches:
+                only:
+                  - pre-alpha
+                  - alpha
+                  - beta
+                  - /+([0-9])?(.{+([0-9]),x}).x/
           requires:
               - release-approval
 
