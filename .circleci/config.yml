@@ -200,7 +200,8 @@ workflows:
                   - pre-alpha
                   - alpha
                   - beta
-                  - /+([0-9])?(.{+([0-9]),x}).x/
+                  - release
+                  - /([0-9]+)\.([0-9]+\.)?([0-9]+|x)/
                 
           requires:
             - test-node-8
@@ -221,7 +222,8 @@ workflows:
                   - pre-alpha
                   - alpha
                   - beta
-                  - /+([0-9])?(.{+([0-9]),x}).x/
+                  - release
+                  - /([0-9]+)\.([0-9]+\.)?([0-9]+|x)/
           requires:
               - release-approval
 
