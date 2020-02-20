@@ -38,4 +38,4 @@ erector_module.erector.setdefined;
 erector_module.erector.values;
 erector_module.erector.labels;
 
-erector_module.erector.does_not_exist;;
+erector_module.erector.does_not_exist;

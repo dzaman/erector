@@ -101,8 +101,8 @@ export class Erector {
     const strings: string[] = _strings.map((el) => el);
     const exps: any[] = this._prepare_exps(_exps);
 
-    let text_parts: string[] = [];
-    let params: any[] = [];
+    const text_parts: string[] = [];
+    const params: any[] = [];
 
     for (let i = 0; i < strings.length - 1; i += 1) {
       const exp = exps[i];
@@ -141,7 +141,7 @@ export class Erector {
 
   // TODO: should this return a Statement?
   public static if(test: any, pass: any, fail: any): any { 
-    let is_pass = typeof test === 'function' ? test() : test;
+    const is_pass = typeof test === 'function' ? test() : test;
     // return pass or fail directly if QueryPart, otherwise Raw?
     return is_pass ? pass : fail;
   }
@@ -279,7 +279,7 @@ export class Erector {
     }
   }
 
-  public static setdefined(obj: { [index:string]: any }, options: SetOptions = {}): Statement | string {
+  public static setdefined(obj: { [index: string]: any }, options: SetOptions = {}): Statement | string {
     const defined_object = Object.keys(obj).reduce((acc: { [key: string]: any[] }, key: string) => {
       const value = obj[key];
 
@@ -328,7 +328,7 @@ export namespace erector {
   export const literal = SingleValueQueryPart.make_template_factory(Literal);
   export const l = literal;
 
-  export let condition = Erector.if;
+  export const condition = Erector.if;
   export const cmp_subquery = Erector.cmp_subquery;
   export const cmp = Erector.cmp;
   export const and = Erector.and;

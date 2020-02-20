@@ -95,7 +95,7 @@ export class EscapeLiteral {
       escaped = 'E' + escaped;
     }
     return escaped;
-  };
+  }
 
   // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/dialects/postgres/index.js#L51
   // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/query/string.js#L22
@@ -131,7 +131,7 @@ export class EscapeLiteral {
 type WrappedValue = (...params: unknown[]) => string | number;
 
 export class WrapIdentifier {
-  protected static _wrap_identifier(value: string):string {
+  protected static _wrap_identifier(value: string): string {
     return value !== '*' ? `"${value.replace(/"/g, '""')}"` : '*';
   }
 

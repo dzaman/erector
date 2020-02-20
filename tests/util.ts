@@ -1,9 +1,9 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 const util = require('/lib/util');
 
 // convert 1, 2, 3 to an arguments array of 1, 2, 3
-const ARGS = ((...args: any[]) => args).apply(undefined, [1, 2, 3]);
+const ARGS = ((...args: any[]): any[] => args).apply(undefined, [1, 2, 3]);
 
 describe('util', () => {
   describe('is_string', () => {
@@ -17,7 +17,7 @@ describe('util', () => {
       [true, false],
       [new Date, false],
       [new Error, false],
-      [() => null, false],
+      [(): null => null, false],
       [{ '0': 1, 'length': 1 }, false],
       [1, false],
       [/x/, false],
@@ -44,6 +44,7 @@ describe('util', () => {
 
   describe('is_object', () => {
     test.each([
+      // eslint-disable-next-line no-sparse-arrays
       [, false],
       [null, false],
       [undefined, false],
@@ -62,7 +63,7 @@ describe('util', () => {
       [Object(false), true],
       [new Date, true],
       [new Error, true],
-      [() => null, true],
+      [(): null => null, true],
       [{ 'a': 1 }, true],
       [Object(0), true],
       [/x/, true],
@@ -134,6 +135,7 @@ describe('util', () => {
       [Math, false],
 
       // should return `false` for non-objects
+      // eslint-disable-next-line no-sparse-arrays
       [, false],
       [null, false],
       [undefined, false],
