@@ -42,7 +42,7 @@ describe('query-parts', () => {
       expect(clone).not.toBe(original);
       expect(clone).toEqual(original);
 
-      _.each(original.content, (value, key) => {
+      _.each(original.content, (value: any, key: any) => {
         expect(clone.content[key]).toBe(original.content[key]);
       });
     });

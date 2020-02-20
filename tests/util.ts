@@ -1,10 +1,9 @@
-const expect = require('expect');
 const _ = require('lodash');
 
 const util = require('/lib/util');
 
 // convert 1, 2, 3 to an arguments array of 1, 2, 3
-const ARGS = (() => arguments).apply(undefined, [1, 2, 3]);
+const ARGS = ((...args: any[]) => args).apply(undefined, [1, 2, 3]);
 
 describe('util', () => {
   describe('is_string', () => {
@@ -75,14 +74,20 @@ describe('util', () => {
   });
 
   describe('is_plain_object', () => {
-    function SimpleConstructor() {
-      this.a = 1;
+    class SimpleConstructor {
+
+      a: number;
+
+      constructor() {
+        this.a = 1;
+      }
     }
+
     const object_null_prototype = Object.create(null);
     object_null_prototype.constructor = Object.prototype.constructor;
 
-    const object_writable_string_tag = {};
-    object_writable_string_tag[Symbol.toStringTag] = 'X';
+    const object_writable_string_tag: { [key in symbol | string]: string } = {};
+    object_writable_string_tag[Symbol.toStringTag as unknown as string] = 'X';
 
     const object_read_only_string_tag = {};
     Object.defineProperty(object_read_only_string_tag, Symbol.toStringTag, {
@@ -92,8 +97,8 @@ describe('util', () => {
       value: 'X',
     });
 
-    const object_tbd_proto = {};
-    object_tbd_proto[Symbol.toStringTag] = undefined;
+    const object_tbd_proto: { [key in symbol | string]: undefined } = {};
+    object_tbd_proto[Symbol.toStringTag as unknown as string] = undefined;
     const object_tbd = Object.create(object_tbd_proto);
 
     beforeAll(() => {
@@ -107,7 +112,7 @@ describe('util', () => {
       [{ 'a': 1 }, true],
       [{ 'constructor': SimpleConstructor }, true],
       [[1, 2, 3], false],
-      [new SimpleConstructor(1), false],
+      [new SimpleConstructor(), false],
 
       // should return `true` for objects with a `[[prototype]]` of `null`
       [Object.create(null), true],
