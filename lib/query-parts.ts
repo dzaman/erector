@@ -97,13 +97,13 @@ export class Identifier extends EscapedSingleValueQueryPart {
 export abstract class List extends MultiValueQueryPart {
 
   public name: string;
-  public content?: any[] | { [index:string]: any };
+  public content?: any[] | { [index: string]: any };
   public source?: List;
 
   constructor();
-  constructor(content: any[] | { [index:string]: any });
+  constructor(content: any[] | { [index: string]: any });
   constructor(name: string);
-  constructor(name: string, content: any[] | { [index:string]: any });
+  constructor(name: string, content: any[] | { [index: string]: any });
   constructor(...args: any[]) {
     super();
 
@@ -141,7 +141,7 @@ export abstract class List extends MultiValueQueryPart {
     return this.content !== undefined;
   }
 
-  protected abstract content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams;
+  protected abstract content_to_placeholders_and_params(content: any[] | { [index: string]: any }): PlaceholderAndParams;
 
   public abstract clone(): List;
 
@@ -189,7 +189,7 @@ export abstract class List extends MultiValueQueryPart {
     }
 
     // we know this to be true
-    const content = this.content || this.source!.content as any[] | { [index:string]: any };
+    const content = this.content || this.source!.content as any[] | { [index: string]: any };
 
     const {
       placeholders,
@@ -202,13 +202,13 @@ export abstract class List extends MultiValueQueryPart {
 }
 
 export interface PlaceholderAndParams {
-  placeholders: string[],
-  params: any[],
+  placeholders: string[];
+  params: any[];
 }
 
 export class ListLabels extends List {
 
-  protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
+  protected content_to_placeholders_and_params(content: any[] | { [index: string]: any }): PlaceholderAndParams {
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -241,7 +241,7 @@ export class ListLabels extends List {
 // TODO: should lists ignore undefined values?
 export class ListValues extends List {
 
-  protected content_to_placeholders_and_params(content: any[] | { [index:string]: any }): PlaceholderAndParams {
+  protected content_to_placeholders_and_params(content: any[] | { [index: string]: any }): PlaceholderAndParams {
 
     const placeholders: string[] = [];
     const params: any[] = [];

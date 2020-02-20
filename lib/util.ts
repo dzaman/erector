@@ -22,7 +22,7 @@ export const unique = (value: any[]): any[] => {
 const node_util = (function() {
   try {
     // Use `util.types` for Node.js 10+.
-    var types = util.types;
+    const types = util.types;
 
     /* istanbul ignore if */
     if (types) {
@@ -35,7 +35,7 @@ const node_util = (function() {
 }());
 
 export const is_object = (value: any) => {
-  var type = typeof value;
+  const type = typeof value;
   return value != null && (type == 'object' || type == 'function');
 }
 
@@ -43,14 +43,14 @@ export const is_object = (value: any) => {
 const get_raw_tag = (value: any) => {
   const is_own = Object.hasOwnProperty.call(value, Symbol.toStringTag);
   const tag = value[Symbol.toStringTag];
-  let unmasked: boolean = false;
+  let unmasked = false;
 
   try {
     value[Symbol.toStringTag] = undefined;
     unmasked = true;
   } catch (e) {}
 
-  var result = Object.prototype.toString.call(value);
+  const result = Object.prototype.toString.call(value);
   if (unmasked) {
     if (is_own) {
       value[Symbol.toStringTag] = tag;
@@ -81,7 +81,7 @@ export const is_plain_object = (value: any) => {
   }
 
 
-  let proto = Object.getPrototypeOf(Object(value));
+  const proto = Object.getPrototypeOf(Object(value));
 
   if (proto === null) {
     return true;

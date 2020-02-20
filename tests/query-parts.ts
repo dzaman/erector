@@ -1,3 +1,9 @@
+// This export allows us to import `escape` into module scope. Without it, there is a name
+// collision with `escape()`. It works because: "a module is any file which contains an import or
+// export." This can also be fixed by using an `import` statement but that requires a little more
+// config work to support absolute paths.
+export {};
+
 const {
   Identifier,
   Literal,
@@ -42,7 +48,7 @@ describe('query-parts', () => {
       expect(clone).not.toBe(original);
       expect(clone).toEqual(original);
 
-      _.each(original.content, (value, key) => {
+      _.each(original.content, (value: any, key: any) => {
         expect(clone.content[key]).toBe(original.content[key]);
       });
     });
