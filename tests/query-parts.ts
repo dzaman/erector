@@ -1,3 +1,9 @@
+// This export allows us to import `escape` into module scope. Without it, there is a name
+// collision with `escape()`. It works because: "a module is any file which contains an import or
+// export." This can also be fixed by using an `import` statement but that requires a little more
+// config work to support absolute paths.
+export {};
+
 const {
   Identifier,
   Literal,
