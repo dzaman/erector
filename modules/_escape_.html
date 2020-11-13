@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;escape&quot; | erector</title>
+	<title>&quot;escape&quot; | sql-erector</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">erector</a>
+					<a href="../index.html" class="title">sql-erector</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -86,17 +86,18 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#_" class="tsd-kind-icon">_</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#querypart" class="tsd-kind-icon">Query<wbr>Part</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#contains_undefined" class="tsd-kind-icon">contains_<wbr>undefined</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#get_undefined_indices" class="tsd-kind-icon">get_<wbr>undefined_<wbr>indices</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#is_plain_object" class="tsd-kind-icon">is_<wbr>plain_<wbr>object</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#contains_undefined" class="tsd-kind-icon">contains_<wbr>undefined</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_escape_.html#escape" class="tsd-kind-icon">escape</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_escape_.html#escape_key_bindings" class="tsd-kind-icon">escape_<wbr>key_<wbr>bindings</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_escape_.html#escape_placeholder_bindings" class="tsd-kind-icon">escape_<wbr>placeholder_<wbr>bindings</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_escape_.html#get_undefined_indices" class="tsd-kind-icon">get_<wbr>undefined_<wbr>indices</a></li>
 							</ul>
 						</section>
 					</div>
@@ -110,7 +111,7 @@
 					<div class="tsd-signature tsd-kind-icon">Wrapped<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L125">escape.ts:125</a></li>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L135">escape.ts:135</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -142,41 +143,48 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="_" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagConst">Const</span> _</h3>
-					<div class="tsd-signature tsd-kind-icon">_<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;require(&#x27;lodash&#x27;)</span></div>
+					<a name="querypart" class="tsd-anchor"></a>
+					<h3>Query<wbr>Part</h3>
+					<div class="tsd-signature tsd-kind-icon">Query<wbr>Part<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L1">escape.ts:1</a></li>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L1">escape.ts:1</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="contains_undefined" class="tsd-anchor"></a>
+					<h3>contains_<wbr>undefined</h3>
+					<div class="tsd-signature tsd-kind-icon">contains_<wbr>undefined<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L6">escape.ts:6</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="get_undefined_indices" class="tsd-anchor"></a>
+					<h3>get_<wbr>undefined_<wbr>indices</h3>
+					<div class="tsd-signature tsd-kind-icon">get_<wbr>undefined_<wbr>indices<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L7">escape.ts:7</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="is_plain_object" class="tsd-anchor"></a>
+					<h3>is_<wbr>plain_<wbr>object</h3>
+					<div class="tsd-signature tsd-kind-icon">is_<wbr>plain_<wbr>object<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L8">escape.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="contains_undefined" class="tsd-anchor"></a>
-					<h3>contains_<wbr>undefined</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">contains_<wbr>undefined<span class="tsd-signature-symbol">(</span>mixed<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L184">escape.ts:184</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>mixed: <span class="tsd-signature-type">any</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
-						</li>
-					</ul>
-				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
 					<a name="escape" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> escape</h3>
@@ -187,7 +195,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L233">escape.ts:233</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L199">escape.ts:199</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -218,7 +226,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L252">escape.ts:252</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L216">escape.ts:216</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -249,7 +257,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L288">escape.ts:288</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/escape.ts#L250">escape.ts:250</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -262,29 +270,6 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="get_undefined_indices" class="tsd-anchor"></a>
-					<h3>get_<wbr>undefined_<wbr>indices</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">get_<wbr>undefined_<wbr>indices<span class="tsd-signature-symbol">(</span>mixed<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/escape.ts#L207">escape.ts:207</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>mixed: <span class="tsd-signature-type">any</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -302,6 +287,15 @@
 					<li class="current tsd-kind-external-module">
 						<a href="_escape_.html">"escape"</a>
 					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_part_base_.html">"query-<wbr>part-<wbr>base"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_parts_.html">"query-<wbr>parts"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_util_.html">"util"</a>
+					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
@@ -316,10 +310,16 @@
 						<a href="_escape_.html#wrappedvalue" class="tsd-kind-icon">Wrapped<wbr>Value</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_escape_.html#_" class="tsd-kind-icon">_</a>
+						<a href="_escape_.html#querypart" class="tsd-kind-icon">Query<wbr>Part</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_escape_.html#contains_undefined" class="tsd-kind-icon">contains_<wbr>undefined</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_escape_.html#get_undefined_indices" class="tsd-kind-icon">get_<wbr>undefined_<wbr>indices</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_escape_.html#is_plain_object" class="tsd-kind-icon">is_<wbr>plain_<wbr>object</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_escape_.html#escape" class="tsd-kind-icon">escape</a>
@@ -329,9 +329,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_escape_.html#escape_placeholder_bindings" class="tsd-kind-icon">escape_<wbr>placeholder_<wbr>bindings</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_escape_.html#get_undefined_indices" class="tsd-kind-icon">get_<wbr>undefined_<wbr>indices</a>
 					</li>
 				</ul>
 			</nav>

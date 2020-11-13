@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>erector</title>
+	<title>sql-erector</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">erector</a>
+					<a href="index.html" class="title">sql-erector</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> erector</h1>
+			<h1> sql-erector</h1>
 		</div>
 	</div>
 </header>
@@ -65,6 +65,150 @@
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
 				<p><a href="https://circleci.com/gh/dzaman/erector"><img src="https://img.shields.io/circleci/build/github/dzaman/erector" alt="CircleCI"></a> <a href="https://codecov.io/gh/dzaman/erector"><img src="https://img.shields.io/codecov/c/github/dzaman/erector" alt="codecov"></a></p>
+				<a href="#erector" id="erector" style="color: inherit; text-decoration: none;">
+					<h1>Erector</h1>
+				</a>
+				<p><code>knex</code> is the most popular query building library for Node, sharing a name with <a href="https://sgwmscdnimages.azureedge.net/84/1-28-2020/58340082863044Joer.JPG">Knex</a>, the children&#39;s building set. <code>erector</code> is a bare-metal query builder for Node named after Knex&#39;s bare-metal cousin, the <a href="https://sgwmscdnimages.azureedge.net/84/1-28-2020/58340082863044Joer.JPG">Erector Set</a>.</p>
+				<p>Erector aims to allow developers to write modular, composable, conditional queries using template strings that safely escape literals and identifiers.</p>
+				<p>This is done by inspecting the query text surrounding template parameters to determine the correct escaping and formatting behavior for each parameter.</p>
+				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+					<h2>Examples</h2>
+				</a>
+				<a href="#escaping-literals" id="escaping-literals" style="color: inherit; text-decoration: none;">
+					<h3>Escaping Literals</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>email=<span class="hljs-string">'the@email.com'</span>;
+passwordhash = <span class="hljs-string">'thehash'</span>;
+
+erector`<span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> "user" <span class="hljs-keyword">where</span> email=${email} <span class="hljs-keyword">and</span> password_hash=${passwordHash}`</code></pre><p><strong>Output</strong></p>
+				<pre><code><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> "user" <span class="hljs-keyword">where</span> email=<span class="hljs-string">'the@email.com'</span> <span class="hljs-keyword">and</span> password_hash=<span class="hljs-string">'thehash'</span></code></pre>
+				<a href="#escaping-identifiers" id="escaping-identifiers" style="color: inherit; text-decoration: none;">
+					<h3>Escaping Identifiers</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code><span class="hljs-attribute">table</span>=<span class="hljs-string">'data_warehouse.events'</span>;
+
+erector`select * <span class="hljs-keyword">from</span> <span class="hljs-string">"<span class="hljs-variable">${table}</span>"</span> where <span class="hljs-attribute">id</span>=123`</code></pre><p><strong>Output</strong></p>
+				<pre><code><span class="hljs-keyword">select</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">"data_warehouse"</span>.<span class="hljs-string">"events"</span> <span class="hljs-keyword">where</span> <span class="hljs-keyword">id</span>=<span class="hljs-number">123</span></code></pre>
+				<a href="#setting-values-only-if-they39re-defined" id="setting-values-only-if-they39re-defined" style="color: inherit; text-decoration: none;">
+					<h3>Setting values only if they&#39;re defined</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>erector<span class="hljs-string">`update "preferences" <span class="hljs-subst">${setdefined({
+  foo: <span class="hljs-string">'abc'</span>,
+  bar: identifier(<span class="hljs-string">'column_ref'</span>),
+  baz: <span class="hljs-literal">undefined</span>,
+}</span>)}`</span>;</code></pre><p><strong>Output</strong></p>
+				<pre><code>update <span class="hljs-string">"preferences"</span> <span class="hljs-builtin-name">set</span> <span class="hljs-attribute">foo</span>=<span class="hljs-string">'abc'</span>, <span class="hljs-attribute">bar</span>=<span class="hljs-string">"column_ref"</span></code></pre>
+				<a href="#inserting-values-from-a-list" id="inserting-values-from-a-list" style="color: inherit; text-decoration: none;">
+					<h3>Inserting values from a list</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>erector`<span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> "user" (${labels()}) <span class="hljs-keyword">values</span> (${<span class="hljs-keyword">values</span>({
+  foo: <span class="hljs-string">'abc'</span>,
+  bar: <span class="hljs-number">123</span>,
+})})`;</code></pre><p><strong>Output</strong></p>
+				<pre><code><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-string">"user"</span> (<span class="hljs-string">"foo"</span>, <span class="hljs-string">"bar"</span>) <span class="hljs-keyword">values</span>(<span class="hljs-string">'abc'</span>, <span class="hljs-number">123</span>);</code></pre>
+				<a href="#selecting-a-list-of-columns" id="selecting-a-list-of-columns" style="color: inherit; text-decoration: none;">
+					<h3>Selecting a list of columns</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>erector`<span class="hljs-keyword">select</span> ${labels(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'bar'</span>, <span class="hljs-string">'baz'</span>)} <span class="hljs-keyword">from</span> <span class="hljs-string">"user"</span> <span class="hljs-keyword">limit</span> <span class="hljs-number">1</span>;</code></pre><p><strong>*Output</strong></p>
+				<pre><code><span class="hljs-keyword">select</span> <span class="hljs-string">"foo"</span>, <span class="hljs-string">"bar"</span>, <span class="hljs-string">"baz"</span> <span class="hljs-keyword">from</span> <span class="hljs-string">"user"</span> <span class="hljs-keyword">limit</span> <span class="hljs-number">1</span>;</code></pre>
+				<a href="#checking-for-values-in-an-array" id="checking-for-values-in-an-array" style="color: inherit; text-decoration: none;">
+					<h3>Checking for values in an array</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>erector`<span class="hljs-keyword">update</span> "foo" <span class="hljs-keyword">set</span> something=<span class="hljs-keyword">true</span> <span class="hljs-keyword">where</span> "bar" <span class="hljs-keyword">in</span> (${<span class="hljs-keyword">values</span>(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)})`;</code></pre><p><strong>Output</strong></p>
+				<pre><code><span class="hljs-keyword">update</span> <span class="hljs-string">"foo"</span> <span class="hljs-keyword">set</span> something=<span class="hljs-literal">true</span> <span class="hljs-keyword">where</span> <span class="hljs-string">"bar"</span> <span class="hljs-keyword">in</span> (<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>);</code></pre>
+				<a href="#conditional-joins" id="conditional-joins" style="color: inherit; text-decoration: none;">
+					<h3>Conditional joins</h3>
+				</a>
+				<p><strong>Input</strong></p>
+				<pre><code>hasMessages = <span class="hljs-literal">true</span>;
+
+erector`
+  select * <span class="hljs-keyword">from</span> <span class="hljs-string">"user"</span> <span class="hljs-keyword">as</span> u
+  ${condition(hasMessages, 'join <span class="hljs-string">"message"</span> <span class="hljs-keyword">as</span> m <span class="hljs-keyword">on</span> m.user_id = u.<span class="hljs-built_in">id</span>')}
+`;</code></pre><p><strong>Output</strong></p>
+				<pre><code>select * <span class="hljs-keyword">from</span> <span class="hljs-string">"user"</span> <span class="hljs-keyword">as</span> u
+join <span class="hljs-string">"message"</span> <span class="hljs-keyword">as</span> m <span class="hljs-keyword">on</span> m.user_id = u.<span class="hljs-built_in">id</span></code></pre>
+				<a href="#and-so-on" id="and-so-on" style="color: inherit; text-decoration: none;">
+					<h3>And so on...</h3>
+				</a>
+				<p>There are more helpers available like <code>cmp</code>, <code>cmp_subquery</code>, <code>or</code>, and <code>and</code> and more ways to interact with the utilities described above.</p>
+				<a href="#module-amp-class-overview" id="module-amp-class-overview" style="color: inherit; text-decoration: none;">
+					<h2>Module &amp; Class Overview</h2>
+				</a>
+				<img width="1083" alt="Screen Shot 2020-11-12 at 7 57 43 PM" src="https://user-images.githubusercontent.com/3486978/99027188-7ca0e600-2521-11eb-9ced-63be3e4b72e7.png">
+				<a href="#erector-1" id="erector-1" style="color: inherit; text-decoration: none;">
+					<h3>Erector</h3>
+				</a>
+				<p>File: <code>lib/erector.ts</code>
+				Exports:</p>
+				<ul>
+					<li><code>raw</code> - Raw template factory for non-escaped values</li>
+					<li><code>i</code>, <code>identifier</code> - Identifier template factory (value to be escaped as &quot;the&quot;.&quot;value&quot;)</li>
+					<li><code>l</code>, <code>literal</code> - Literal template factory (value to be escaped as &#39;value&#39;)</li>
+					<li><code>condition</code>, <code>if</code> - Evaluates a condition and returns the pass or fail value accordingly</li>
+					<li><code>cmp_subquery</code> - Statement factory corresponding to &quot;??? IN (???, ...)&quot;</li>
+					<li><code>cmp</code> - Statement factory corresponding to &quot;??? <em>operator</em> ???&quot;</li>
+					<li><code>and</code> - Statement factory correspondng to &quot;??? AND ???&quot;</li>
+					<li><code>or</code> - Statement factory corresponding to &quot;??? OR ???&quot;</li>
+					<li><code>set</code> - Statement factory corresponding to a set condition (??=?, ...)</li>
+					<li><code>setdefined</code> - Statement factory corresponding to a set condition that filters undefined values</li>
+					<li><code>values</code> - ListValues factory</li>
+					<li><code>labels</code> - ListLabels factory</li>
+					<li><strong><code>erector</code></strong> - a namespace containing all of the above exports</li>
+				</ul>
+				<a href="#summary" id="summary" style="color: inherit; text-decoration: none;">
+					<h2>Summary</h2>
+				</a>
+				<a href="#the-good" id="the-good" style="color: inherit; text-decoration: none;">
+					<h3>The Good</h3>
+				</a>
+				<ul>
+					<li>Minimal API that is sufficiently comprehensive for real-world applications<ul>
+							<li>Flexible invocation patterns</li>
+							<li>Separation of responsibility for parsing and formatting</li>
+						</ul>
+					</li>
+					<li>100% test coverage, with automated builds for <a href="https://app.circleci.com/pipelines/github/dzaman/erector/145/workflows/f5afa7f8-9099-4587-8fff-4256ff625d47">all high-volume Node versions</a></li>
+					<li>Well typed (mostly)<ul>
+							<li>I hadn&#39;t <a href="https://github.com/dzaman/erector/projects/1">gotten around to</a> cleaning up all of the types and casts</li>
+						</ul>
+					</li>
+					<li>There&#39;s documentation on the decisions around the <a href="https://github.com/dzaman/erector/wiki/release-process">release process</a> and some <a href="https://github.com/dzaman/erector/wiki/erector-module-definition">typescript decisions</a>. The intent is to document the <em>why</em> behind decisions with signifcant impact or that required research.</li>
+					<li>Dev tooling coverage for: <em>(see <code>package.json</code>)</em><ul>
+							<li>building </li>
+							<li>testing &amp; coverage</li>
+							<li>tsdoc doc generation &amp; publishing</li>
+						</ul>
+					</li>
+				</ul>
+				<a href="#the-bad" id="the-bad" style="color: inherit; text-decoration: none;">
+					<h3>The Bad</h3>
+				</a>
+				<ul>
+					<li>There&#39;s not much code-level documentation that I didn&#39;t add <em>just now</em> (specifically for this branch)<ul>
+							<li>Though there is <a href="https://github.com/dzaman/erector/wiki/documentation-plan">intent</a> to get documentation ready before 1.0 (along with some other <a href="https://github.com/dzaman/erector/wiki/milestone-plan">prerequisites</a>)</li>
+							<li>The <code>jsdoc</code> comments are mainly there to test <code>tsdoc</code> generation at this point 🤦‍♂️</li>
+						</ul>
+					</li>
+					<li>The testing, while comprehensive, is focused mostly on unit tests and not more complex, illustrative applications. They&#39;re the kind of tests you write while actively developing, not tests written with the perspective of the completed library<ul>
+							<li>I use <code>test.each</code> to iterate over test inputs without repeating test code, and in some cases I include labels that describe each case, and in other cases I omitted those. I found this style of writing tests to be harder to read than I liked and subsequently avoided it.</li>
+						</ul>
+					</li>
+					<li>I hadn&#39;t landed my <a href="https://github.com/dzaman/erector/pull/32">linting</a> PR</li>
+				</ul>
+				<a href="#the-deluglydel-odd" id="the-deluglydel-odd" style="color: inherit; text-decoration: none;">
+					<h3>The <del>Ugly</del> Odd</h3>
+				</a>
+				<ul>
+					<li>I decided to remove <code>lodash</code> and make this a zero-dependency module. I depended on four functions that had to be added custom in <code>lib/util</code>. These functions are lifted from <code>lodash</code> directly and tested for compatibility with <code>lodash</code> explicitly. The <a href="https://github.com/dzaman/erector/wiki/utility-functions">why</a> is actually covered in a wiki doc, but ultimately it wasn&#39;t an ROI focused decision -- I thought it would be fun.</li>
+					<li>I wanted compatible escaping behavior with <code>knex</code> to enable migration which is why there&#39;s borrowed escaping code in <code>lib/escape</code> and there are tests verifying compatibilty with the <code>knex</code></li>
+				</ul>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -78,6 +222,15 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_escape_.html">"escape"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_query_part_base_.html">"query-<wbr>part-<wbr>base"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_query_parts_.html">"query-<wbr>parts"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_util_.html">"util"</a>
 					</li>
 				</ul>
 			</nav>

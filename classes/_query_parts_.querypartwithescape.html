@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>QueryPart | erector</title>
+	<title>QueryPartWithEscape | sql-erector</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">erector</a>
+					<a href="../index.html" class="title">sql-erector</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,13 +56,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_erector_.html">&quot;erector&quot;</a>
+					<a href="../modules/_query_parts_.html">&quot;query-parts&quot;</a>
 				</li>
 				<li>
-					<a href="_erector_.querypart.html">QueryPart</a>
+					<a href="_query_parts_.querypartwithescape.html">QueryPartWithEscape</a>
 				</li>
 			</ul>
-			<h1>Class QueryPart</h1>
+			<h1>Class QueryPartWithEscape</h1>
 		</div>
 	</div>
 </header>
@@ -73,13 +73,18 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">QueryPart</span>
+						<a href="_query_part_base_.querypart.html" class="tsd-signature-type">QueryPart</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<a href="_erector_.multivaluequerypart.html" class="tsd-signature-type">MultiValueQueryPart</a>
-							</li>
-							<li>
-								<a href="_erector_.singlevaluequerypart.html" class="tsd-signature-type">SingleValueQueryPart</a>
+								<span class="target">QueryPartWithEscape</span>
+								<ul class="tsd-hierarchy">
+									<li>
+										<a href="_query_parts_.multivaluequerypart.html" class="tsd-signature-type">MultiValueQueryPart</a>
+									</li>
+									<li>
+										<a href="_query_parts_.singlevaluequerypart.html" class="tsd-signature-type">SingleValueQueryPart</a>
+									</li>
+								</ul>
 							</li>
 						</ul>
 					</li>
@@ -92,16 +97,16 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_erector_.querypart.html#placeholder" class="tsd-kind-icon">placeholder</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="_erector_.querypart.html#escape" class="tsd-kind-icon">escape</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_query_parts_.querypartwithescape.html#placeholder" class="tsd-kind-icon">placeholder</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="_query_parts_.querypartwithescape.html#escape" class="tsd-kind-icon">escape</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_erector_.querypart.html#format" class="tsd-kind-icon">format</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_erector_.querypart.html#param" class="tsd-kind-icon">param</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_erector_.querypart.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_query_parts_.querypartwithescape.html#format" class="tsd-kind-icon">format</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_query_parts_.querypartwithescape.html#param" class="tsd-kind-icon">param</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_query_parts_.querypartwithescape.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
 							</ul>
 						</section>
 					</div>
@@ -109,74 +114,78 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="placeholder" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> placeholder</h3>
 					<div class="tsd-signature tsd-kind-icon">placeholder<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_query_part_base_.querypart.html">QueryPart</a>.<a href="_query_part_base_.querypart.html#placeholder">placeholder</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/erector.ts#L19">erector.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/query-part-base.ts#L5">query-part-base.ts:5</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="escape" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> escape</h3>
-					<div class="tsd-signature tsd-kind-icon">escape<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;escape</span></div>
+					<div class="tsd-signature tsd-kind-icon">escape<span class="tsd-signature-symbol">:</span> <a href="" class="tsd-signature-type">escape</a><span class="tsd-signature-symbol"> =&nbsp;escape</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/erector.ts#L17">erector.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/query-parts.ts#L17">query-parts.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="format" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> format</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">format<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="_query_part_base_.querypart.html">QueryPart</a>.<a href="_query_part_base_.querypart.html#format">format</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/erector.ts#L22">erector.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/query-part-base.ts#L26">query-part-base.ts:26</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="param" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> param</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">param<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="_query_part_base_.querypart.html">QueryPart</a>.<a href="_query_part_base_.querypart.html#param">param</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/erector.ts#L21">erector.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/query-part-base.ts#L23">query-part-base.ts:23</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="tostring" class="tsd-anchor"></a>
 					<h3>to<wbr>String</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">to<wbr>String<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="_query_part_base_.querypart.html">QueryPart</a>.<a href="_query_part_base_.querypart.html#tostring">toString</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/dzaman/erector/blob/2560209/lib/erector.ts#L24">erector.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/dzaman/erector/blob/7453928/lib/query-part-base.ts#L28">query-part-base.ts:28</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -191,120 +200,99 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_erector_.html">"erector"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_escape_.html">"escape"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_query_part_base_.html">"query-<wbr>part-<wbr>base"</a>
+					</li>
+					<li class="current tsd-kind-external-module">
+						<a href="../modules/_query_parts_.html">"query-<wbr>parts"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_util_.html">"util"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.escapedsinglevaluequerypart.html" class="tsd-kind-icon">Escaped<wbr>Single<wbr>Value<wbr>Query<wbr>Part</a>
+						<a href="_query_parts_.escapedsinglevaluequerypart.html" class="tsd-kind-icon">Escaped<wbr>Single<wbr>Value<wbr>Query<wbr>Part</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.identifier.html" class="tsd-kind-icon">Identifier</a>
+						<a href="_query_parts_.identifier.html" class="tsd-kind-icon">Identifier</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.list.html" class="tsd-kind-icon">List</a>
+						<a href="_query_parts_.list.html" class="tsd-kind-icon">List</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.listlabels.html" class="tsd-kind-icon">List<wbr>Labels</a>
+						<a href="_query_parts_.listlabels.html" class="tsd-kind-icon">List<wbr>Labels</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.listvalues.html" class="tsd-kind-icon">List<wbr>Values</a>
+						<a href="_query_parts_.listvalues.html" class="tsd-kind-icon">List<wbr>Values</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.literal.html" class="tsd-kind-icon">Literal</a>
+						<a href="_query_parts_.literal.html" class="tsd-kind-icon">Literal</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.multivaluequerypart.html" class="tsd-kind-icon">Multi<wbr>Value<wbr>Query<wbr>Part</a>
+						<a href="_query_parts_.multivaluequerypart.html" class="tsd-kind-icon">Multi<wbr>Value<wbr>Query<wbr>Part</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.querypart.html" class="tsd-kind-icon">Query<wbr>Part</a>
+						<a href="_query_parts_.querypartwithescape.html" class="tsd-kind-icon">Query<wbr>Part<wbr>With<wbr>Escape</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_erector_.querypart.html#placeholder" class="tsd-kind-icon">placeholder</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="_query_parts_.querypartwithescape.html#placeholder" class="tsd-kind-icon">placeholder</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
-								<a href="_erector_.querypart.html#escape" class="tsd-kind-icon">escape</a>
+								<a href="_query_parts_.querypartwithescape.html#escape" class="tsd-kind-icon">escape</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_erector_.querypart.html#format" class="tsd-kind-icon">format</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_query_parts_.querypartwithescape.html#format" class="tsd-kind-icon">format</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_erector_.querypart.html#param" class="tsd-kind-icon">param</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_query_parts_.querypartwithescape.html#param" class="tsd-kind-icon">param</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_erector_.querypart.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_query_parts_.querypartwithescape.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.raw.html" class="tsd-kind-icon">Raw</a>
+						<a href="_query_parts_.raw.html" class="tsd-kind-icon">Raw</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.singlevaluequerypart.html" class="tsd-kind-icon">Single<wbr>Value<wbr>Query<wbr>Part</a>
+						<a href="_query_parts_.singlevaluequerypart.html" class="tsd-kind-icon">Single<wbr>Value<wbr>Query<wbr>Part</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_erector_.statement.html" class="tsd-kind-icon">Statement</a>
+						<a href="_query_parts_.statement.html" class="tsd-kind-icon">Statement</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_erector_.placeholderandparams.html" class="tsd-kind-icon">Placeholder<wbr>And<wbr>Params</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_erector_.setoptions.html" class="tsd-kind-icon">Set<wbr>Options</a>
+						<a href="../interfaces/_query_parts_.placeholderandparams.html" class="tsd-kind-icon">Placeholder<wbr>And<wbr>Params</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../interfaces/_erector_.singlevaluequerypartconstructor.html" class="tsd-kind-icon">Single<wbr>Value<wbr>Query<wbr>Part<wbr>Constructor</a>
+						<a href="../interfaces/_query_parts_.singlevaluequerypartconstructor.html" class="tsd-kind-icon">Single<wbr>Value<wbr>Query<wbr>Part<wbr>Constructor</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#statementparam" class="tsd-kind-icon">Statement<wbr>Param</a>
+						<a href="../modules/_query_parts_.html#statementparam" class="tsd-kind-icon">Statement<wbr>Param</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#statementparamfunction" class="tsd-kind-icon">Statement<wbr>Param<wbr>Function</a>
+						<a href="../modules/_query_parts_.html#statementparamfunction" class="tsd-kind-icon">Statement<wbr>Param<wbr>Function</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#_" class="tsd-kind-icon">_</a>
+						<a href="../modules/_query_parts_.html#placeholder_identifier" class="tsd-kind-icon">PLACEHOLDER_<wbr>IDENTIFIER</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#assert" class="tsd-kind-icon">assert</a>
+						<a href="../modules/_query_parts_.html#placeholder_literal" class="tsd-kind-icon">PLACEHOLDER_<wbr>LITERAL</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#escape" class="tsd-kind-icon">escape</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#i" class="tsd-kind-icon">i</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#l" class="tsd-kind-icon">l</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#raw-1" class="tsd-kind-icon">raw</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#_resolve_function_recursively" class="tsd-kind-icon">_resolve_<wbr>function_<wbr>recursively</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#cmp" class="tsd-kind-icon">cmp</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_erector_.html#cmp_subquery" class="tsd-kind-icon">cmp_<wbr>subquery</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#erector" class="tsd-kind-icon">erector</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#labels" class="tsd-kind-icon">labels</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_erector_.html#values" class="tsd-kind-icon">values</a>
+						<a href="../modules/_query_parts_.html#placeholder_raw" class="tsd-kind-icon">PLACEHOLDER_<wbr>RAW</a>
 					</li>
 				</ul>
 			</nav>
