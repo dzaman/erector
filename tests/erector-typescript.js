@@ -1,6 +1,8 @@
 const child_process = require('child_process');
 
 describe('erector-typescript', () => {
+  // Only run this test in CI because it's super slow
+  // Also output snapshot is directory specific -- though that could be changed
   const argv = process.env.npm_config_argv ? JSON.parse(process.env.npm_config_argv) : { remain: [] };
   const test_fn = argv.remain.includes('--ci') ? test : test.skip;
 

@@ -59,15 +59,44 @@ describe('erector', () => {
   describe('erector', () => {
     describe('template', () => {
       test.each([
-        ['placeholder at end', erector`hello ${'world'}`, `hello 'world'`],
-        ['placeholder in between', erector`hello ${'world'}!`, `hello 'world'!`],
-        ['placeholder at beginning', erector`${'goodbye'} world`, `'goodbye' world`],
-        ['identifier override', erector`hello ${i`world`}`, `hello "world"`],
-        ['double quotes trigger identifier override', erector`hello "${'world as w'}"`, `hello "world" as "w"`],
-        ['lists values are expanded', erector`goodbye ${values(['cruel', 'world'])}`, `goodbye 'cruel', 'world'`],
-        ['lists labels are expanded', erector`goodbye ${labels(['cruel', 'world'])}`, `goodbye "cruel", "world"`],
-        ['lists values and labels are linked', erector`insert into (${labels()}) values (${values({ a: 'foo', b: 'bar' })})`, `insert into ("a", "b") values ('foo', 'bar')`],
-        ['functions are resolved', erector`hello ${() => 'world'}`, `hello 'world'`],
+        [
+          'placeholder at end',
+          erector`hello ${'world'}`,
+          `hello 'world'`,
+        ], [
+          'placeholder in between',
+          erector`hello ${'world'}!`,
+          `hello 'world'!`,
+        ],
+        [
+          'placeholder at beginning',
+          erector`${'goodbye'} world`,
+          `'goodbye' world`,
+        ], [
+          'identifier override',
+          erector`hello ${i`world`}`,
+          `hello "world"`,
+        ], [
+          'double quotes trigger identifier override',
+          erector`hello "${'world as w'}"`,
+          `hello "world" as "w"`,
+        ], [
+          'lists values are expanded',
+          erector`goodbye ${values(['cruel', 'world'])}`,
+          `goodbye 'cruel', 'world'`,
+        ], [
+          'lists labels are expanded',
+          erector`goodbye ${labels(['cruel', 'world'])}`,
+          `goodbye "cruel", "world"`,
+        ], [
+          'lists values and labels are linked',
+          erector`insert into (${labels()}) values (${values({ a: 'foo', b: 'bar' })})`,
+          `insert into ("a", "b") values ('foo', 'bar')`,
+        ], [
+          'functions are resolved',
+          erector`hello ${() => 'world'}`,
+          `hello 'world'`,
+        ],
       ])('%p', (_name, result, expected) => {
         expect(result.toString()).toBe(expected);
       });
@@ -94,6 +123,7 @@ describe('erector', () => {
   
     describe('if', () => {
       test.each([
+        // [condition, pass_value, fail_value, expected_value]
         [true, 'a', 'b', 'a'],
         [false, 'a', 'b', 'b'],
         ['truthy', 'a', 'b', 'a'],

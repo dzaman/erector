@@ -8,6 +8,10 @@ import {
   unique,
 } from './util';
 
+const PLACEHOLDER_LITERAL = '?';
+const PLACEHOLDER_IDENTIFIER = '??';
+const PLACEHOLDER_RAW = '???';
+
 export abstract class QueryPartWithEscape extends QueryPart {
 
   static readonly escape = escape; 
@@ -23,11 +27,13 @@ interface SingleValueQueryPartConstructor {
   new(value: any): SingleValueQueryPart;
 }
 
-
 export abstract class MultiValueQueryPart extends QueryPartWithEscape {
 
-  public placeholder = '???';
+  // Multi-value query parts get serialized by their `param()` method, so
+  // they should be paired with the as-is placeholder
+  public placeholder = PLACEHOLDER_RAW;
 
+  // See note about param() in `query-part-base`
   public param(): any {
     return this.format();
   }
@@ -44,10 +50,13 @@ export abstract class SingleValueQueryPart extends QueryPartWithEscape {
     this.value = value;
   }
 
+  // See note about param() in `query-part-base`
   public param(): any {
     return this.value;
   }
 
+  // creates a template-string function that acts as a factory for the target class. It's used for
+  // i`foo`, l`foo`, and raw`foo` which produce Identifiers, Literals, and Raw strings respectively
   public static make_template_factory(target_class: SingleValueQueryPartConstructor) {
     return (strings: string[], ...exps: any[]) => {
       const values: string[] = [];
@@ -67,7 +76,7 @@ export abstract class SingleValueQueryPart extends QueryPartWithEscape {
 
 export class Raw extends SingleValueQueryPart {
 
-  public placeholder = '???';
+  public placeholder = PLACEHOLDER_RAW;
 
   public format(): string {
     return `${this.value}`;
@@ -77,6 +86,7 @@ export class Raw extends SingleValueQueryPart {
 export abstract class EscapedSingleValueQueryPart extends SingleValueQueryPart {
 
   public format(): string {
+    // <typeof ClassName>this.constructor) is how you access static methods from an instance method
     return (<typeof EscapedSingleValueQueryPart>this.constructor).escape(this.placeholder, this.value);
   }
 
@@ -84,13 +94,13 @@ export abstract class EscapedSingleValueQueryPart extends SingleValueQueryPart {
 
 export class Literal extends EscapedSingleValueQueryPart {
 
-  public placeholder = '?';
+  public placeholder = PLACEHOLDER_LITERAL;
 
 }
  
 export class Identifier extends EscapedSingleValueQueryPart {
 
-  public placeholder = '??';
+  public placeholder = PLACEHOLDER_IDENTIFIER;
 
 }
 
@@ -145,7 +155,9 @@ export abstract class List extends MultiValueQueryPart {
 
   public abstract clone(): List;
 
+  // Does a shallow comparison of `this.content` and `other` to see if they're equal
   public is_content_equal(other: List): boolean {
+    // translation: !!this.content xor !!other.content (TypeScript is opinionated about operands)
     if ((this.content === undefined ? 1 : 0) ^ (other.content === undefined ? 1 : 0)) {
       return false;
     }
@@ -188,7 +200,7 @@ export abstract class List extends MultiValueQueryPart {
       throw Error('No list source is available');
     }
 
-    // we know this to be true
+    // we know this to be true, but should give another crack at avoiding this cast
     const content = this.content || this.source!.content as any[] | { [index:string]: any };
 
     const {
@@ -220,7 +232,8 @@ export class ListLabels extends List {
         placeholders.push(label.placeholder);
         params.push(label.param());
       } else {
-        placeholders.push('??');
+        // TODO: access Identifier.placeholder
+        placeholders.push(PLACEHOLDER_IDENTIFIER);
         params.push(label);
       }
     });
@@ -254,7 +267,7 @@ export class ListValues extends List {
         params.push(value.param());
       } else {
         // TODO: access Literal.placeholder
-        placeholders.push('?');
+        placeholders.push(PLACEHOLDER_LITERAL);
         params.push(value);
       }
     });
@@ -290,6 +303,7 @@ export class Statement extends MultiValueQueryPart {
 
   public format(): string {
     // this actually needs to handle ???
+    // <typeof ClassName>this.constructor) is how you access static methods from an instance method
     return (<typeof Statement>this.constructor).escape(this.text, this.params);
   }
 

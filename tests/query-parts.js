@@ -52,6 +52,7 @@ describe('query-parts', () => {
       ListLabels,
     ])('%p (shared)', (class_ref) => {
       test.each([
+        // [constructor params, .name, .content, .is_source()]
         [[], '_', undefined, false],
         [['foo'], 'foo', undefined, false],
         [[['a']], '_', ['a'], true],
@@ -66,6 +67,7 @@ describe('query-parts', () => {
       });
   
       test.each([
+        // [content, format()'s expected result]
         [[new Literal('a'), new Literal(2)], `'a', 2`],
         [[new Raw('foo()'), new Identifier('bar')], `foo(), "bar"`],
       ])('format with override %p -> %p', (content, expected) => {
@@ -89,8 +91,11 @@ describe('query-parts', () => {
     describe('ListValues & ListLabels', () => {
       test.each([
         [ 
+          // list a
           new ListValues([1, 2, 3]),
+          // list b
           new ListValues([1, 2, 3]),
+          // a.is_content_equal(b)
           true,
         ], [
           new ListLabels([1, 2, 3]),
@@ -161,7 +166,9 @@ describe('query-parts', () => {
     describe('ListValues', () => {
       test.each([
         [
+          // list labels constructor params
           ['a', 'b'],
+          // expeced result of format()
           `'a', 'b'`
         ], [
           { a: 1, b: 2 },
@@ -188,7 +195,9 @@ describe('query-parts', () => {
     describe('ListLabels', () => {
       test.each([
         [
+          // list labels constructor params
           ['a', 'b'],
+          // expeced result of format()
           '"a", "b"',
         ], [
           { a: 1, b: 2 },

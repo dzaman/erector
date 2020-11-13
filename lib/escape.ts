@@ -9,19 +9,20 @@ const {
 export class EscapeLiteral {
 
   // pg version
+  // https://github.com/knex/knex/blob/80355e48509857fb4941f65f4b611973a9ee99d5/lib/dialects/postgres/index.js#L52
   protected static escape_array(arr: any[]): string {
     let result = '{';
     for (let i = 0; i < arr.length; i++) {
       if (i > 0) result += ',';
       const val = arr[i];
       if (val === null || typeof val === 'undefined') {
-	result += 'NULL';
+        result += 'NULL';
       } else if (Array.isArray(val)) {
-	result += this.escape_array(val);
+        result += this.escape_array(val);
       } else if (typeof val === 'number') {
-	result += val;
+        result += val;
       } else {
-	result += JSON.stringify(typeof val === 'string' ? val : this.escape_value(val));
+        result += JSON.stringify(typeof val === 'string' ? val : this.escape_value(val));
       }
     }
     return result + '}';
@@ -39,6 +40,7 @@ export class EscapeLiteral {
     return number;
   }
 
+  // https://github.com/knex/knex/blob/078b749892f30d445292257bc6ecc61ae6abf7fc/lib/query/string.js#L104
   protected static escape_date(date: Date): string {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
@@ -73,6 +75,7 @@ export class EscapeLiteral {
     return JSON.stringify(val);
   }
 
+  // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/dialects/postgres/index.js#L51
   protected static escape_string(value: string): string {
     let has_backslash = false;
     let escaped = "'";
@@ -97,7 +100,6 @@ export class EscapeLiteral {
     return escaped;
   };
 
-  // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/dialects/postgres/index.js#L51
   // https://github.com/knex/knex/blob/9aa7085b052938dc5252d10b2b418a475637eda5/lib/query/string.js#L22
   public static escape_value(value_or_fn: any): string {
     let value = typeof value_or_fn === 'function' ? value_or_fn() : value_or_fn;
@@ -139,6 +141,7 @@ export class WrapIdentifier {
     return `${first} as ${second}`;
   }
 
+  // https://github.com/knex/knex/blob/02d94d96b004a023c5ae1a77109f897e334fb21a/lib/formatter.js#L273
   protected static wrap_string(value: string): string {
     const asIndex = value.toLowerCase().indexOf(' as ');
     if (asIndex !== -1) {

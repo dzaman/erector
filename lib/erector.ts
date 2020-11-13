@@ -25,6 +25,7 @@ export * from './query-parts';
 
 export class Erector {
 
+  // Calls exp() until exp() no longer evaluates to a function
   // NOTE: exp is mutated
   protected static _resolve_function_recursively(exp: StatementParam): StatementParam {
     while (typeof exp === 'function') {
@@ -34,6 +35,7 @@ export class Erector {
     return exp;
   }
 
+  // Call `set_source` on all references with their respective sources
   protected static _set_list_sources(list_sources: { [key: string]: List }, list_references: { [key: string]: List[] }): void {
     Object.keys(list_references).forEach((key: string) => {
       const lists: List[] = list_references[key];
@@ -47,10 +49,13 @@ export class Erector {
     });
   }
 
+  // If this exp is a list, add it to the map of list_sources and list_references
+  // WARNING(dzaman): this mutates list_sources and list_references, but not _exp
   protected static _prepare_exp(_exp: any, list_sources: { [key: string]: List }, list_references: { [key: string]: List[] }): any {
     let exp = this._resolve_function_recursively(_exp);
 
     if (exp instanceof List) {
+      // Don't modify the input in case the caller wants to re-use it!
       // TODO(dzaman 2019-10-20): make a constructor for this or a factory method
       // exps[i] = new (exp.constructor)(exp.name, exp.content);
       exp = exp.clone();
@@ -78,6 +83,12 @@ export class Erector {
     return exp;
   }
 
+  // Run through all expressions and build up a list of list sources & references
+  // Make sure that they correspond to one another
+  // Then update the expressions to link sources and references where they need to be linked
+  //
+  // This enables things like "insert into "users" (${this.labels('foo')}) VALUES(${this.values('foo', { a: 1, b: 2 })})
+  // Though in this trivial example the label can be omitted entirely
   protected static _prepare_exps(exps: any[]): any[] {
     const list_sources: { [key: string]: List } = {};
     const list_references: { [key: string]: List[] } = {};
@@ -95,6 +106,11 @@ export class Erector {
   }
 
   /**
+   * Joins template string parts, evaluates parameters based on the surrounding characters in the
+   * query (e.g. " vs ') and constructs a Statement
+   * 
+   * See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+   * 
    * @param strings   Comment for `strings`
    */
   public static template(_strings: string[], ..._exps: any[]) {
@@ -149,9 +165,9 @@ export class Erector {
   public static cmp_subquery(a: StatementParam, operator: string, b: StatementParam): Statement | string;
   public static cmp_subquery(a: StatementParam, b: StatementParam): Statement | string;
   public static cmp_subquery(a: StatementParam, ...args: any[]): Statement | string {
-    const default_operator = args.length === 1;
-    const operator = default_operator ? 'IN' : args[0];
-    const b_input = default_operator ? args[0] : args[1];
+    const use_default_operator = args.length === 1;
+    const operator = use_default_operator ? 'IN' : args[0];
+    const b_input = use_default_operator ? args[0] : args[1];
     const b_array = Array.isArray(b_input) ? b_input : [b_input];
 
     // TODO: are these checks sufficient?
@@ -196,9 +212,9 @@ export class Erector {
   public static cmp(a: StatementParam, operator: string, b: StatementParam): Statement | string;
   public static cmp(a: StatementParam, b: StatementParam): Statement | string;
   public static cmp(a: StatementParam, ...args: any[]): Statement | string {
-    const default_operator = args.length === 1;
-    const operator = default_operator ? '=' : args[0];
-    const b = default_operator ? args[0] : args[1];
+    const use_default_operator = args.length === 1;
+    const operator = use_default_operator ? '=' : args[0];
+    const b = use_default_operator ? args[0] : args[1];
 
     if (b === undefined) {
       // return an empty string because it's better for this to be excludeable in a template string
@@ -362,5 +378,6 @@ export const labels = erector.labels;
 
 // make `if` an alias for `condition`
 erector.if = erector.condition;
+// No one can import this meaningfully without renaming it, but I wanted to see if it could be done
 export { condition as if };
 

@@ -34,12 +34,13 @@ const node_util = (function() {
   } catch (e) {}
 }());
 
+// https://github.com/lodash/lodash/blob/4.17.15/lodash.js#L11743
 export const is_object = (value: any) => {
   var type = typeof value;
   return value != null && (type == 'object' || type == 'function');
 }
 
-// getRawTag
+// https://github.com/lodash/lodash/blob/4.17.15/lodash.js#L5984
 const get_raw_tag = (value: any) => {
   const is_own = Object.hasOwnProperty.call(value, Symbol.toStringTag);
   const tag = value[Symbol.toStringTag];
@@ -61,7 +62,6 @@ const get_raw_tag = (value: any) => {
   return result;
 }
 
-// baseGetTag
 const get_tag = (value: any) => {
   if (value === undefined) {
     return '[object Undefined]';
@@ -72,6 +72,7 @@ const get_tag = (value: any) => {
   }
 }
 
+// https://github.com/lodash/lodash/blob/4.17.15/lodash.js#L12036
 export const is_plain_object = (value: any) => {
   const is_object_like = typeof value === 'object' && value !== null;
   const tag = get_tag(value);

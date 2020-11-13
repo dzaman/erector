@@ -123,9 +123,9 @@ There are more helpers available like `cmp`, `cmp_subquery`, `or`, and `and` and
 
 File: `lib/erector.ts`
 Exports:
-  - `raw` - Raw factory for non-escaped values
-  - `i`, `identifier` - Identifier factory (value to be escaped as "the"."value")
-  - `l`, `literal` - Literal factory (value to be escaped as 'value')
+  - `raw` - Raw template factory for non-escaped values
+  - `i`, `identifier` - Identifier template factory (value to be escaped as "the"."value")
+  - `l`, `literal` - Literal template factory (value to be escaped as 'value')
   - `condition`, `if` - Evaluates a condition and returns the pass or fail value accordingly
   - `cmp_subquery` - Statement factory corresponding to "??? IN (???, ...)"
   - `cmp` - Statement factory corresponding to "??? <operator> ???"
@@ -144,9 +144,9 @@ Exports:
 - Minimal API that is sufficiently comprehensive for real-world applications
   - Flexible invocation patterns
   - Separation responsibility for parsing and formatting
-- 100% test coverage, with automated builds for all Node version
+- 100% test coverage, with automated builds for [all high-volume Node versions](https://app.circleci.com/pipelines/github/dzaman/erector/145/workflows/f5afa7f8-9099-4587-8fff-4256ff625d47)
 - Well typed (mostly)
-  - I hadn't [gotten around to](https://github.com/dzaman/erector/projects/1) cleaning up all of the types
+  - I hadn't [gotten around to](https://github.com/dzaman/erector/projects/1) cleaning up all of the types and casts
 - There's documentation on the decisions around the [release process](https://github.com/dzaman/erector/wiki/release-process) and some [typescript decisions](https://github.com/dzaman/erector/wiki/erector-module-definition). The intent is to document the _why_ behind decisions with signifcant impact or that required research.
 - Dev tooling coverage for: *(see `package.json`)*
   - building 
@@ -159,10 +159,10 @@ Exports:
   - Though there is [intent](https://github.com/dzaman/erector/wiki/documentation-plan) to get documentation ready before 1.0 (along with some other [prerequisites](https://github.com/dzaman/erector/wiki/milestone-plan))
   - The `jsdoc` comments are mainly there to test `tsdoc` generation at this point 🤦‍♂️
 - The testing, while comprehensive, is focused mostly on unit tests and not more complex, illustrative applications. They're the kind of tests you write while actively developing, not tests written with the perspective of the completed library
-  - I use `test.each` to iterate over test inputs without repeating test code, and in some cases I include labels that describe each case, and in other cases I omitted those
+  - I use `test.each` to iterate over test inputs without repeating test code, and in some cases I include labels that describe each case, and in other cases I omitted those. I found this style of writing tests to be harder to read than I liked and subsequently avoided it.
 - I hadn't landed my [linting](https://github.com/dzaman/erector/pull/32) PR
 
 ### The ~~Ugly~~ Odd 
 
-- I decided to remove `lodash` and make this a zero-dependency module. I depended on four functions that had to be added custom in `lib/util`. These functions are lifted from `lodash` directly and tested for compatibility with `lodash` explicitly. The [why](https://github.com/dzaman/erector/wiki/utility-functions) is actually covered in a wiki doc, but ultimately it wasn't an ROI focused decision.
+- I decided to remove `lodash` and make this a zero-dependency module. I depended on four functions that had to be added custom in `lib/util`. These functions are lifted from `lodash` directly and tested for compatibility with `lodash` explicitly. The [why](https://github.com/dzaman/erector/wiki/utility-functions) is actually covered in a wiki doc, but ultimately it wasn't an ROI focused decision -- I thought it would be fun.
 - I wanted compatible escaping behavior with `knex` to enable migration which is why there's borrowed escaping code in `lib/escape` and there are tests verifying compatibilty with the `knex`
