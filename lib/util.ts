@@ -1,5 +1,7 @@
 import util from 'util';
 
+// Much of this is taken directly from `lodash`, especially where noted
+
 export const is_string = (value: unknown): boolean => {
   // types added in v10.0.0
   // util.types && util.types.isStringObject(value)

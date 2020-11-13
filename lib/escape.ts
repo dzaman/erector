@@ -1,5 +1,7 @@
 const { QueryPart } = require('./query-part-base');
 
+// Much of this is taken directly from knex, especially where noted
+
 const {
   contains_undefined,
   get_undefined_indices,
