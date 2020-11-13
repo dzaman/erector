@@ -128,7 +128,7 @@ Exports:
   - `l`, `literal` - Literal template factory (value to be escaped as 'value')
   - `condition`, `if` - Evaluates a condition and returns the pass or fail value accordingly
   - `cmp_subquery` - Statement factory corresponding to "??? IN (???, ...)"
-  - `cmp` - Statement factory corresponding to "??? <operator> ???"
+  - `cmp` - Statement factory corresponding to "??? *operator* ???"
   - `and` - Statement factory correspondng to "??? AND ???"
   - `or` - Statement factory corresponding to "??? OR ???"
   - `set` - Statement factory corresponding to a set condition (??=?, ...)
@@ -143,7 +143,7 @@ Exports:
 
 - Minimal API that is sufficiently comprehensive for real-world applications
   - Flexible invocation patterns
-  - Separation responsibility for parsing and formatting
+  - Separation of responsibility for parsing and formatting
 - 100% test coverage, with automated builds for [all high-volume Node versions](https://app.circleci.com/pipelines/github/dzaman/erector/145/workflows/f5afa7f8-9099-4587-8fff-4256ff625d47)
 - Well typed (mostly)
   - I hadn't [gotten around to](https://github.com/dzaman/erector/projects/1) cleaning up all of the types and casts
