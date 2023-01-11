@@ -33,7 +33,7 @@
     "gh-pages": "^2.1.1",
     "jest": "^24.9.0",
     "jest-junit": "^8.0.0",
-    "knex": "^0.19.5",
+    "knex": "^2.4.0",
     "lodash": "^4.17.15",
     "lodash-cli": "^4.17.5",
     "semantic-release": "^16.0.2",
